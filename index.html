@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hyperbasis</title>
+    <style>
+        @font-face {
+            font-family: 'Aptos';
+            src: url('fonts/Aptos.ttf') format('truetype');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Aptos';
+            src: url('fonts/Aptos-SemiBold.ttf') format('truetype');
+            font-weight: 600;
+        }
+        @font-face {
+            font-family: 'Aptos';
+            src: url('fonts/Aptos-Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Aptos Mono';
+            src: url('fonts/Aptos-Mono.ttf') format('truetype');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Aptos', -apple-system, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Landing Page */
+        #landing {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #landing h1 {
+            font-size: 42px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        #landing .subtitle {
+            color: #555;
+            margin-bottom: 40px;
+        }
+
+        .auth-container {
+            background: #111;
+            padding: 30px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 360px;
+            border: 1px solid #222;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            border-bottom: 1px solid transparent;
+            transition: color 0.2s;
+        }
+
+        .auth-tab.active {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        .auth-tab:hover {
+            color: #888;
+        }
+
+        .auth-form {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-form.active {
+            display: flex;
+        }
+
+        .auth-form input {
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .auth-form input::placeholder {
+            color: #444;
+        }
+
+        .auth-form button {
+            padding: 12px;
+            background: #fff;
+            border: none;
+            border-radius: 2px;
+            color: #000;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .auth-form button:hover {
+            background: #ccc;
+        }
+
+        .error {
+            color: #888;
+            font-size: 12px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        /* Game Page */
+        #game {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #game.active {
+            display: flex;
+        }
+
+        #landing.hidden {
+            display: none;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #111;
+            border-bottom: 1px solid #222;
+        }
+
+        .game-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info span {
+            color: #555;
+        }
+
+        .user-info strong {
+            color: #888;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #555;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            border-color: #555;
+            color: #888;
+        }
+
+        /* Game Stats Bar */
+        .game-stats {
+            display: flex;
+            gap: 30px;
+            padding: 15px 20px;
+            background: #0d0d0d;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
+            color: #444;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Aptos Mono', monospace;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #0d0d0d;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .tool-btn {
+            padding: 10px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #666;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            border-color: #444;
+            color: #888;
+        }
+
+        .tool-btn.active {
+            background: #222;
+            border-color: #555;
+            color: #fff;
+        }
+
+        .toolbar-spacer {
+            flex: 1;
+        }
+
+        #save-btn, #new-game-btn {
+            background: none;
+        }
+
+        #save-btn {
+            color: #4a4;
+            border-color: #2a3a2a;
+        }
+
+        #save-btn:hover {
+            border-color: #4a4;
+        }
+
+        #new-game-btn {
+            color: #a44;
+            border-color: #3a2a2a;
+        }
+
+        #new-game-btn:hover {
+            border-color: #a44;
+        }
+
+        /* Game Content */
+        .game-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        /* Datacenter Grid */
+        #datacenter-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            grid-template-rows: repeat(10, 50px);
+            gap: 2px;
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #222;
+        }
+
+        .grid-cell {
+            background: #1a1a1a;
+            border: 1px solid #252525;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-cell:hover {
+            background: #222;
+            border-color: #333;
+        }
+
+        .grid-cell.rack {
+            background: #252525;
+            border-color: #444;
+        }
+
+        .rack-icon {
+            color: #666;
+            font-size: 20px;
+        }
+
+        /* Game Message */
+        #game-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #222;
+            color: #888;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 13px;
+            opacity: 0;
+            transition: all 0.3s;
+            border: 1px solid #333;
+        }
+
+        #game-message.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing">
+        <h1>Hyperbasis</h1>
+        <p class="subtitle">Build your infrastructure empire</p>
+
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active">
+                <input type="text" id="login-username" placeholder="Username" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <p class="error" id="login-error"></p>
+                <button type="submit">Login</button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="auth-form">
+                <input type="text" id="signup-username" placeholder="Username" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <input type="password" id="signup-confirm" placeholder="Confirm Password" required>
+                <p class="error" id="signup-error"></p>
+                <button type="submit">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Game Page -->
+    <div id="game">
+        <div class="game-header">
+            <h1>Hyperbasis</h1>
+            <div class="user-info">
+                <span>Playing as: <strong id="display-username"></strong></span>
+                <button class="logout-btn" id="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat">
+                <span class="stat-label">Money</span>
+                <span class="stat-value" id="money-display">$100,000</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Power</span>
+                <span class="stat-value" id="power-display">0 kW</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Cooling</span>
+                <span class="stat-value" id="cooling-display">0 tons</span>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="tool-btn active" data-tool="rack">Rack ($5,000)</button>
+            <button class="tool-btn" data-tool="delete">Delete</button>
+            <div class="toolbar-spacer"></div>
+            <button class="tool-btn" id="save-btn">Save</button>
+            <button class="tool-btn" id="new-game-btn">New Game</button>
+        </div>
+
+        <div class="game-content">
+            <div id="datacenter-grid"></div>
+        </div>
+    </div>
+
+    <div id="game-message"></div>
+
+    <script src="auth.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
