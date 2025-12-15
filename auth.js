@@ -377,6 +377,11 @@ const Metro = {
         this.modePan.classList.toggle('active', mode === 'pan');
         this.modeSelect.classList.toggle('active', mode === 'select');
         this.metroContent.classList.toggle('selecting', mode === 'select');
+
+        // Clear selection when switching to pan
+        if (mode === 'pan') {
+            this.clearSelection();
+        }
     },
 
     setZoom(newZoom) {
@@ -389,7 +394,7 @@ const Metro = {
     },
 
     onMouseDown(e) {
-        if (e.target.closest('.map-controls') || e.target.closest('.mode-toggle')) return;
+        if (e.target.closest('.map-controls') || e.target.closest('.mode-toggle') || e.target.closest('.selection-info')) return;
 
         if (this.mode === 'pan') {
             this.isPanning = true;
@@ -398,6 +403,14 @@ const Metro = {
             this.metroContent.classList.add('dragging');
         } else if (this.mode === 'select') {
             this.isSelecting = true;
+            // Check if we clicked on a tile
+            const tile = e.target.closest('.land-tile.available');
+            if (tile && tile.dataset.tileId) {
+                const entry = this.tileElements[tile.dataset.tileId];
+                if (entry) {
+                    this.toggleTileSelection(entry.tile, entry.el);
+                }
+            }
         }
     },
 
@@ -410,6 +423,15 @@ const Metro = {
             this.lastMouseX = e.clientX;
             this.lastMouseY = e.clientY;
             this.updateTransform();
+        } else if (this.isSelecting && this.mode === 'select') {
+            // Drag selection
+            const tile = document.elementFromPoint(e.clientX, e.clientY);
+            if (tile && tile.classList.contains('land-tile') && tile.classList.contains('available') && tile.dataset.tileId) {
+                const entry = this.tileElements[tile.dataset.tileId];
+                if (entry && !this.selectedTiles.find(t => t.id === entry.tile.id)) {
+                    this.addTileToSelection(entry.tile, entry.el);
+                }
+            }
         }
     },
 
@@ -480,20 +502,6 @@ const Metro = {
                     el.classList.add('available');
                     el.dataset.tileId = tile.id;
                     this.tileElements[tile.id] = { el, tile };
-
-                    el.addEventListener('mousedown', (e) => {
-                        if (this.mode === 'select') {
-                            e.stopPropagation();
-                            this.isSelecting = true;
-                            this.toggleTileSelection(tile, el);
-                        }
-                    });
-
-                    el.addEventListener('mouseenter', () => {
-                        if (this.mode === 'select' && this.isSelecting) {
-                            this.addTileToSelection(tile, el);
-                        }
-                    });
                 } else {
                     el.classList.add('unavailable');
                 }
