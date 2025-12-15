@@ -18,10 +18,6 @@
             src: url('fonts/Aptos-Bold.ttf') format('truetype');
             font-weight: 700;
         }
-        @font-face {
-            font-family: 'Aptos Mono';
-            src: url('fonts/Aptos-Mono.ttf') format('truetype');
-        }
 
         * {
             margin: 0;
@@ -37,7 +33,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Landing Page */
+        /* Landing Page (Auth) */
         #landing {
             display: flex;
             flex-direction: column;
@@ -151,14 +147,17 @@
             display: block;
         }
 
-        /* Game Page */
-        #game {
+        /* Main Menu (after login) */
+        #main-menu {
             display: none;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
+            padding: 20px;
         }
 
-        #game.active {
+        #main-menu.active {
             display: flex;
         }
 
@@ -166,210 +165,74 @@
             display: none;
         }
 
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #111;
-            border-bottom: 1px solid #222;
-        }
-
-        .game-header h1 {
-            font-size: 18px;
+        #main-menu h1 {
+            font-size: 48px;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 3px;
             color: #fff;
+            margin-bottom: 10px;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-info span {
-            color: #555;
-        }
-
-        .user-info strong {
-            color: #888;
-        }
-
-        .logout-btn {
-            padding: 8px 16px;
-            background: none;
-            border: 1px solid #333;
-            border-radius: 2px;
-            color: #555;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-
-        .logout-btn:hover {
-            border-color: #555;
-            color: #888;
-        }
-
-        /* Game Stats Bar */
-        .game-stats {
-            display: flex;
-            gap: 30px;
-            padding: 15px 20px;
-            background: #0d0d0d;
-            border-bottom: 1px solid #1a1a1a;
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stat-label {
+        #main-menu .welcome {
             color: #444;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-value {
-            font-family: 'Aptos Mono', monospace;
-            color: #fff;
+            margin-bottom: 60px;
             font-size: 14px;
         }
 
-        /* Toolbar */
-        .toolbar {
-            display: flex;
-            gap: 10px;
-            padding: 15px 20px;
-            background: #0d0d0d;
-            border-bottom: 1px solid #1a1a1a;
+        #main-menu .welcome strong {
+            color: #666;
         }
 
-        .tool-btn {
-            padding: 10px 16px;
-            background: #1a1a1a;
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .menu-btn {
+            padding: 16px 32px;
+            background: #111;
             border: 1px solid #333;
-            border-radius: 2px;
-            color: #666;
-            cursor: pointer;
+            border-radius: 4px;
+            color: #fff;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 16px;
+            cursor: pointer;
             transition: all 0.2s;
         }
 
-        .tool-btn:hover {
-            border-color: #444;
-            color: #888;
-        }
-
-        .tool-btn.active {
-            background: #222;
-            border-color: #555;
-            color: #fff;
-        }
-
-        .toolbar-spacer {
-            flex: 1;
-        }
-
-        #save-btn, #new-game-btn {
-            background: none;
-        }
-
-        #save-btn {
-            color: #4a4;
-            border-color: #2a3a2a;
-        }
-
-        #save-btn:hover {
-            border-color: #4a4;
-        }
-
-        #new-game-btn {
-            color: #a44;
-            border-color: #3a2a2a;
-        }
-
-        #new-game-btn:hover {
-            border-color: #a44;
-        }
-
-        /* Game Content */
-        .game-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        /* Datacenter Grid */
-        #datacenter-grid {
-            display: grid;
-            grid-template-columns: repeat(10, 50px);
-            grid-template-rows: repeat(10, 50px);
-            gap: 2px;
-            background: #111;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #222;
-        }
-
-        .grid-cell {
+        .menu-btn:hover {
             background: #1a1a1a;
-            border: 1px solid #252525;
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-color: #444;
         }
 
-        .grid-cell:hover {
-            background: #222;
+        .menu-btn:disabled {
+            color: #333;
+            cursor: not-allowed;
+        }
+
+        .menu-btn:disabled:hover {
+            background: #111;
             border-color: #333;
         }
 
-        .grid-cell.rack {
-            background: #252525;
-            border-color: #444;
-        }
-
-        .rack-icon {
-            color: #666;
-            font-size: 20px;
-        }
-
-        /* Game Message */
-        #game-message {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #222;
-            color: #888;
-            padding: 12px 24px;
-            border-radius: 4px;
+        .menu-btn-secondary {
+            background: none;
+            color: #555;
             font-size: 13px;
-            opacity: 0;
-            transition: all 0.3s;
-            border: 1px solid #333;
+            padding: 12px;
         }
 
-        #game-message.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
+        .menu-btn-secondary:hover {
+            background: none;
+            color: #888;
         }
     </style>
 </head>
 <body>
-    <!-- Landing Page -->
+    <!-- Landing Page (Auth) -->
     <div id="landing">
         <h1>Hyperbasis</h1>
         <p class="subtitle">Build your infrastructure empire</p>
@@ -399,47 +262,18 @@
         </div>
     </div>
 
-    <!-- Game Page -->
-    <div id="game">
-        <div class="game-header">
-            <h1>Hyperbasis</h1>
-            <div class="user-info">
-                <span>Playing as: <strong id="display-username"></strong></span>
-                <button class="logout-btn" id="logout-btn">Logout</button>
-            </div>
-        </div>
+    <!-- Main Menu -->
+    <div id="main-menu">
+        <h1>Hyperbasis</h1>
+        <p class="welcome">Welcome, <strong id="display-username"></strong></p>
 
-        <div class="game-stats">
-            <div class="stat">
-                <span class="stat-label">Money</span>
-                <span class="stat-value" id="money-display">$100,000</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Power</span>
-                <span class="stat-value" id="power-display">0 kW</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Cooling</span>
-                <span class="stat-value" id="cooling-display">0 tons</span>
-            </div>
-        </div>
-
-        <div class="toolbar">
-            <button class="tool-btn active" data-tool="rack">Rack ($5,000)</button>
-            <button class="tool-btn" data-tool="delete">Delete</button>
-            <div class="toolbar-spacer"></div>
-            <button class="tool-btn" id="save-btn">Save</button>
-            <button class="tool-btn" id="new-game-btn">New Game</button>
-        </div>
-
-        <div class="game-content">
-            <div id="datacenter-grid"></div>
+        <div class="menu-buttons">
+            <button class="menu-btn" id="new-game-btn">New Game</button>
+            <button class="menu-btn" id="load-game-btn" disabled>Load Game</button>
+            <button class="menu-btn menu-btn-secondary" id="logout-btn">Logout</button>
         </div>
     </div>
 
-    <div id="game-message"></div>
-
     <script src="auth.js"></script>
-    <script src="game.js"></script>
 </body>
 </html>

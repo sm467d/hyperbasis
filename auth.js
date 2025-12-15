@@ -1,81 +1,67 @@
 // Auth System - localStorage based
 
 const Auth = {
-    // Get all users from localStorage
     getUsers() {
-        const users = localStorage.getItem('infratycoon_users');
+        const users = localStorage.getItem('hyperbasis_users');
         return users ? JSON.parse(users) : {};
     },
 
-    // Save users to localStorage
     saveUsers(users) {
-        localStorage.setItem('infratycoon_users', JSON.stringify(users));
+        localStorage.setItem('hyperbasis_users', JSON.stringify(users));
     },
 
-    // Get current session
     getSession() {
-        const session = localStorage.getItem('infratycoon_session');
+        const session = localStorage.getItem('hyperbasis_session');
         return session ? JSON.parse(session) : null;
     },
 
-    // Save session
     saveSession(username) {
-        localStorage.setItem('infratycoon_session', JSON.stringify({
+        localStorage.setItem('hyperbasis_session', JSON.stringify({
             username,
             loginTime: Date.now()
         }));
     },
 
-    // Clear session
     clearSession() {
-        localStorage.removeItem('infratycoon_session');
+        localStorage.removeItem('hyperbasis_session');
     },
 
-    // Sign up
     signup(username, password) {
         if (!username || !password) {
             return { success: false, error: 'Username and password required' };
         }
-
         if (username.length < 3) {
             return { success: false, error: 'Username must be at least 3 characters' };
         }
-
         if (password.length < 4) {
             return { success: false, error: 'Password must be at least 4 characters' };
         }
 
         const users = this.getUsers();
-
         if (users[username]) {
             return { success: false, error: 'Username already exists' };
         }
 
-        // Store user (in real app, hash the password!)
         users[username] = {
             password: password,
             createdAt: Date.now(),
-            gameData: null
+            saves: []
         };
 
         this.saveUsers(users);
         this.saveSession(username);
-
         return { success: true };
     },
 
-    // Login
     login(username, password) {
         if (!username || !password) {
             return { success: false, error: 'Username and password required' };
         }
 
         const users = this.getUsers();
-
         if (!users[username]) {
             return { success: false, error: 'User not found' };
         }
-
         if (users[username].password !== password) {
             return { success: false, error: 'Incorrect password' };
         }
@@ -84,20 +70,24 @@ const Auth = {
         return { success: true };
     },
 
-    // Logout
     logout() {
         this.clearSession();
     },
 
-    // Check if logged in
     isLoggedIn() {
         return this.getSession() !== null;
     },
 
-    // Get current username
     getCurrentUser() {
         const session = this.getSession();
         return session ? session.username : null;
+    },
+
+    hasSaves() {
+        const username = this.getCurrentUser();
+        if (!username) return false;
+        const users = this.getUsers();
+        return users[username]?.saves?.length > 0;
     }
 };
 
@@ -105,12 +95,14 @@ const Auth = {
 const UI = {
     init() {
         this.landing = document.getElementById('landing');
-        this.game = document.getElementById('game');
+        this.mainMenu = document.getElementById('main-menu');
         this.loginForm = document.getElementById('login-form');
         this.signupForm = document.getElementById('signup-form');
         this.tabs = document.querySelectorAll('.auth-tab');
         this.logoutBtn = document.getElementById('logout-btn');
         this.displayUsername = document.getElementById('display-username');
+        this.loadGameBtn = document.getElementById('load-game-btn');
+        this.newGameBtn = document.getElementById('new-game-btn');
 
         this.bindEvents();
         this.checkSession();
@@ -141,6 +133,16 @@ const UI = {
 
         // Logout
         this.logoutBtn.addEventListener('click', () => this.handleLogout());
+
+        // New Game (placeholder)
+        this.newGameBtn.addEventListener('click', () => {
+            alert('Game not yet implemented');
+        });
+
+        // Load Game (placeholder)
+        this.loadGameBtn.addEventListener('click', () => {
+            alert('No saves available');
+        });
     },
 
     switchTab(tab) {
@@ -156,15 +158,13 @@ const UI = {
             this.signupForm.classList.add('active');
         }
 
-        // Clear errors
         this.clearErrors();
     },
 
     handleLogin(username, password) {
         const result = Auth.login(username, password);
-
         if (result.success) {
-            this.showGame();
+            this.showMainMenu();
         } else {
             this.showError('login-error', result.error);
         }
@@ -177,9 +177,8 @@ const UI = {
         }
 
         const result = Auth.signup(username, password);
-
         if (result.success) {
-            this.showGame();
+            this.showMainMenu();
         } else {
             this.showError('signup-error', result.error);
         }
@@ -205,7 +204,7 @@ const UI = {
 
     checkSession() {
         if (Auth.isLoggedIn()) {
-            this.showGame();
+            this.showMainMenu();
         } else {
             this.showLanding();
         }
@@ -213,16 +212,17 @@ const UI = {
 
     showLanding() {
         this.landing.classList.remove('hidden');
-        this.game.classList.remove('active');
+        this.mainMenu.classList.remove('active');
         this.clearForms();
     },
 
-    showGame() {
+    showMainMenu() {
         this.landing.classList.add('hidden');
-        this.game.classList.add('active');
+        this.mainMenu.classList.add('active');
         this.displayUsername.textContent = Auth.getCurrentUser();
-        // Initialize game
-        Game.init();
+
+        // Enable/disable load button based on saves
+        this.loadGameBtn.disabled = !Auth.hasSaves();
     },
 
     clearForms() {
