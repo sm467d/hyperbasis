@@ -161,7 +161,8 @@
             display: flex;
         }
 
-        #landing.hidden {
+        #landing.hidden,
+        #main-menu.hidden {
             display: none;
         }
 
@@ -229,6 +230,622 @@
             background: none;
             color: #888;
         }
+
+        /* Game Config Screen */
+        #game-config {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #game-config.active {
+            display: flex;
+        }
+
+        #game-config h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #fff;
+            margin-bottom: 40px;
+        }
+
+        .config-container {
+            background: #111;
+            padding: 30px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid #222;
+        }
+
+        .config-section {
+            margin-bottom: 25px;
+        }
+
+        .config-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .config-label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .config-input::-webkit-outer-spin-button,
+        .config-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .config-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Region Multiselect */
+        .region-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .region-option {
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #555;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .region-option:hover {
+            border-color: #444;
+            color: #888;
+        }
+
+        .region-option.selected {
+            border-color: #666;
+            color: #fff;
+            background: #1a1a1a;
+        }
+
+        .region-option:last-child:nth-child(odd) {
+            grid-column: span 2;
+        }
+
+        /* Difficulty Select */
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .difficulty-option {
+            padding: 12px 8px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #555;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .difficulty-option:hover {
+            border-color: #444;
+            color: #888;
+        }
+
+        .difficulty-option.selected {
+            border-color: #666;
+            color: #fff;
+            background: #1a1a1a;
+        }
+
+        /* Config Buttons */
+        .config-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .config-btn {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #333;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .config-btn-back {
+            background: none;
+            color: #555;
+        }
+
+        .config-btn-back:hover {
+            border-color: #444;
+            color: #888;
+        }
+
+        .config-btn-start {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .config-btn-start:hover {
+            background: #ccc;
+            border-color: #ccc;
+        }
+
+        .config-btn-start:disabled {
+            background: #333;
+            border-color: #333;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        /* Game Screen */
+        #game-screen {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #game-screen.active {
+            display: flex;
+        }
+
+        .game-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: #111;
+            border-bottom: 1px solid #222;
+        }
+
+        .game-banner-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .company-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .capital-display {
+            font-family: 'Aptos Mono', monospace;
+            font-size: 16px;
+            color: #fff;
+            padding: 8px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 2px;
+        }
+
+        .game-banner-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .banner-btn {
+            padding: 8px 16px;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #555;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .banner-btn:hover {
+            border-color: #555;
+            color: #888;
+        }
+
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .na-map {
+            display: grid;
+            grid-template-columns: repeat(7, 80px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 4px;
+        }
+
+        .map-tile {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #444;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .map-tile:hover {
+            background: #222;
+            border-color: #444;
+            color: #888;
+        }
+
+        .map-tile.empty {
+            background: transparent;
+            border-color: transparent;
+            cursor: default;
+        }
+
+        .map-tile.empty:hover {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .map-tile {
+            position: relative;
+        }
+
+        .map-tile[data-name]:hover::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #222;
+            border: 1px solid #444;
+            padding: 6px 10px;
+            border-radius: 2px;
+            font-size: 11px;
+            color: #fff;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        /* Metro Detail View */
+        #metro-detail {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #metro-detail.active {
+            display: flex;
+        }
+
+        .metro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: #111;
+            border-bottom: 1px solid #222;
+        }
+
+        .metro-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            padding: 8px 12px;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #555;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            border-color: #555;
+            color: #888;
+        }
+
+        .metro-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .metro-content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        .metro-content.dragging {
+            cursor: grabbing;
+        }
+
+        .metro-content.selecting {
+            cursor: crosshair;
+        }
+
+        .map-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .map-world {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+        }
+
+        .land-grid {
+            background: #0a0a0a;
+        }
+
+        .land-grid {
+            display: grid;
+            gap: 1px;
+            user-select: none;
+        }
+
+        .land-tile {
+            width: 28px;
+            height: 28px;
+            background: #131313;
+            border: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6px;
+            color: #222;
+            transition: background 0.05s;
+        }
+
+        .land-tile.water {
+            background: #0a0a0f;
+            border-color: #0f0f15;
+        }
+
+        .land-tile.available {
+            background: #1a1a1a;
+            border-color: #282828;
+            color: #333;
+        }
+
+        .land-tile.available:hover {
+            background: #222;
+            border-color: #383838;
+        }
+
+        .land-tile.available.selecting {
+            background: #2d2d2d;
+            border-color: #505050;
+        }
+
+        .land-tile.owned {
+            background: #252525;
+            border-color: #444;
+        }
+
+        .land-tile.unavailable {
+            background: #161616;
+            border-color: #202020;
+            color: #282828;
+        }
+
+        /* Region Labels */
+        .region-labels {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .region-label {
+            position: absolute;
+            color: #3a3a3a;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .region-label.major {
+            font-size: 14px;
+            color: #444;
+        }
+
+        /* Map Controls */
+        .map-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .map-control-btn {
+            width: 36px;
+            height: 36px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-control-btn:hover {
+            background: #222;
+            border-color: #444;
+            color: #888;
+        }
+
+        /* Mode Toggle */
+        .mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .mode-btn {
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            color: #555;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            border-right: 1px solid #333;
+        }
+
+        .mode-btn:last-child {
+            border-right: none;
+        }
+
+        .mode-btn.active {
+            background: #252525;
+            color: #fff;
+        }
+
+        .mode-btn:hover:not(.active) {
+            color: #888;
+        }
+
+        /* Selection Info */
+        .selection-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #444;
+            padding: 12px 24px;
+            border-radius: 4px;
+            display: none;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .selection-info.active {
+            display: flex;
+        }
+
+        .selection-info span {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .selection-info strong {
+            color: #fff;
+        }
+
+        .selection-info button {
+            padding: 8px 16px;
+            background: #fff;
+            border: none;
+            border-radius: 2px;
+            color: #000;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .selection-info button:hover {
+            background: #ccc;
+        }
+
+        .selection-info button:disabled {
+            background: #333;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        .selection-info .cancel-btn {
+            background: none;
+            border: 1px solid #444;
+            color: #666;
+        }
+
+        .selection-info .cancel-btn:hover {
+            border-color: #666;
+            color: #888;
+        }
+
+        /* Coordinates display */
+        .coords-display {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 8px 12px;
+            border-radius: 2px;
+            font-size: 11px;
+            color: #555;
+            font-family: 'Aptos Mono', monospace;
+        }
     </style>
 </head>
 <body>
@@ -271,6 +888,146 @@
             <button class="menu-btn" id="new-game-btn">New Game</button>
             <button class="menu-btn" id="load-game-btn" disabled>Load Game</button>
             <button class="menu-btn menu-btn-secondary" id="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <!-- Game Config -->
+    <div id="game-config">
+        <h1>New Game</h1>
+
+        <div class="config-container">
+            <div class="config-section">
+                <label class="config-label">Company Name</label>
+                <input type="text" id="company-name" class="config-input" placeholder="Enter company name" required>
+            </div>
+
+            <div class="config-section">
+                <label class="config-label">Starting Capital</label>
+                <input type="number" id="starting-capital" class="config-input" value="10000000" min="1000000">
+            </div>
+
+            <div class="config-section">
+                <label class="config-label">Region</label>
+                <div class="region-grid">
+                    <button class="region-option selected" data-region="north-america">North America</button>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <label class="config-label">Difficulty</label>
+                <div class="difficulty-grid">
+                    <button class="difficulty-option" data-difficulty="easy">Easy</button>
+                    <button class="difficulty-option selected" data-difficulty="normal">Normal</button>
+                    <button class="difficulty-option" data-difficulty="hard">Hard</button>
+                    <button class="difficulty-option" data-difficulty="insane">Insane</button>
+                </div>
+            </div>
+
+            <div class="config-buttons">
+                <button class="config-btn config-btn-back" id="config-back-btn">Back</button>
+                <button class="config-btn config-btn-start" id="config-start-btn">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+        <div class="game-banner">
+            <div class="game-banner-left">
+                <span class="company-name" id="game-company-name">Company</span>
+                <span class="capital-display" id="game-capital">$10,000,000</span>
+            </div>
+            <div class="game-banner-right">
+                <button class="banner-btn" id="game-menu-btn">Menu</button>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div class="na-map" id="na-map">
+                <!-- Row 1: Canada -->
+                <div class="map-tile empty"></div>
+                <div class="map-tile empty"></div>
+                <div class="map-tile" data-name="British Columbia">BC</div>
+                <div class="map-tile" data-name="Alberta">AB</div>
+                <div class="map-tile" data-name="Saskatchewan / Manitoba">SK/MB</div>
+                <div class="map-tile metro" data-metro="toronto" data-name="Toronto">ON</div>
+                <div class="map-tile metro" data-metro="montreal" data-name="Montreal">QC</div>
+
+                <!-- Row 2: US North -->
+                <div class="map-tile metro" data-metro="seattle" data-name="Seattle">WA</div>
+                <div class="map-tile" data-name="Montana">MT</div>
+                <div class="map-tile" data-name="North Dakota">ND</div>
+                <div class="map-tile" data-name="Minnesota">MN</div>
+                <div class="map-tile metro" data-metro="chicago" data-name="Chicago">IL</div>
+                <div class="map-tile" data-name="Michigan">MI</div>
+                <div class="map-tile metro" data-metro="new-york" data-name="New York">NY</div>
+
+                <!-- Row 3: US Middle -->
+                <div class="map-tile metro" data-metro="portland" data-name="Portland">OR</div>
+                <div class="map-tile" data-name="Idaho">ID</div>
+                <div class="map-tile" data-name="Wyoming">WY</div>
+                <div class="map-tile" data-name="Nebraska">NE</div>
+                <div class="map-tile" data-name="Iowa">IA</div>
+                <div class="map-tile metro" data-metro="columbus" data-name="Columbus">OH</div>
+                <div class="map-tile metro" data-metro="nova" data-name="Northern Virginia">VA</div>
+
+                <!-- Row 4: US South -->
+                <div class="map-tile metro" data-metro="bay-area" data-name="Bay Area">CA</div>
+                <div class="map-tile metro" data-metro="phoenix" data-name="Phoenix">AZ</div>
+                <div class="map-tile" data-name="New Mexico">NM</div>
+                <div class="map-tile metro" data-metro="dallas" data-name="Dallas">TX</div>
+                <div class="map-tile" data-name="Louisiana">LA</div>
+                <div class="map-tile metro" data-metro="atlanta" data-name="Atlanta">GA</div>
+                <div class="map-tile" data-name="North Carolina">NC</div>
+
+                <!-- Row 5: US South + Mexico -->
+                <div class="map-tile empty"></div>
+                <div class="map-tile empty"></div>
+                <div class="map-tile" data-name="Mexico North">MX-N</div>
+                <div class="map-tile" data-name="Mexico Central">MX-C</div>
+                <div class="map-tile" data-name="Mexico South">MX-S</div>
+                <div class="map-tile metro" data-metro="miami" data-name="Miami">FL</div>
+                <div class="map-tile empty"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metro Detail View -->
+    <div id="metro-detail">
+        <div class="metro-header">
+            <div class="metro-header-left">
+                <button class="back-btn" id="metro-back-btn">← Back</button>
+                <span class="metro-title" id="metro-title">Northern Virginia</span>
+            </div>
+            <span class="capital-display" id="metro-capital">$10,000,000</span>
+        </div>
+
+        <div class="metro-content" id="metro-content">
+            <div class="map-viewport" id="map-viewport">
+                <div class="map-world" id="map-world">
+                    <div class="land-grid" id="land-grid"></div>
+                    <div class="region-labels" id="region-labels"></div>
+                </div>
+            </div>
+
+            <div class="mode-toggle">
+                <button class="mode-btn active" data-mode="pan" id="mode-pan">Pan</button>
+                <button class="mode-btn" data-mode="select" id="mode-select">Select</button>
+            </div>
+
+            <div class="map-controls">
+                <button class="map-control-btn" id="zoom-in">+</button>
+                <button class="map-control-btn" id="zoom-out">−</button>
+            </div>
+
+            <div class="coords-display" id="coords-display">0, 0</div>
+
+            <div class="selection-info" id="selection-info">
+                <span><strong id="selection-count">0</strong> tiles</span>
+                <span>Total: <strong id="selection-total">$0</strong></span>
+                <button class="cancel-btn" id="selection-cancel">Cancel</button>
+                <button id="selection-buy">Buy</button>
+            </div>
         </div>
     </div>
 
