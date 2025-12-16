@@ -83,11 +83,12 @@ export const PowerRedundancyOptions = [
 ];
 
 // DC Size options - footprint in tiles
+// 50 racks per tile uniformly across all sizes
 export const DCSizeOptions = [
   { id: '1x1', name: '1×1 (Edge)', tiles: 1, racksPerTile: 50 },
-  { id: '2x2', name: '2×2 (Standard)', tiles: 4, racksPerTile: 80 },
-  { id: '4x4', name: '4×4 (Regional)', tiles: 16, racksPerTile: 120 },
-  { id: '8x8', name: '8×8 (Hyperscaler)', tiles: 64, racksPerTile: 160 },
+  { id: '2x2', name: '2×2 (Standard)', tiles: 4, racksPerTile: 50 },
+  { id: '4x4', name: '4×4 (Regional)', tiles: 16, racksPerTile: 50 },
+  { id: '8x8', name: '8×8 (Hyperscaler)', tiles: 64, racksPerTile: 50 },
 ];
 
 // ============================================
@@ -307,6 +308,9 @@ export const Designs = {
   rackDesigns: [] as RackDesign[],
   initialized: false,
 
+  // Current view state
+  currentView: 'list' as 'list' | 'dc' | 'rack',
+
   // DOM elements
   container: null as HTMLElement | null,
   spcnList: null as HTMLElement | null,
@@ -326,8 +330,13 @@ export const Designs = {
   },
 
   bindEvents(): void {
-    document.getElementById('new-spcn-btn')?.addEventListener('click', () => this.showSPCNForm());
-    document.getElementById('new-rack-btn')?.addEventListener('click', () => this.showRackForm());
+    // New design buttons
+    document.getElementById('new-spcn-btn')?.addEventListener('click', () => this.showDCDesignView());
+    document.getElementById('new-rack-btn')?.addEventListener('click', () => this.showRackDesignView());
+
+    // Back buttons
+    document.getElementById('dc-design-back')?.addEventListener('click', () => this.showListView());
+    document.getElementById('rack-design-back')?.addEventListener('click', () => this.showListView());
 
     // Form submissions
     document.getElementById('spcn-form')?.addEventListener('submit', (e) => {
@@ -339,30 +348,57 @@ export const Designs = {
       this.saveRackDesign();
     });
 
-    // Cancel buttons (both X button and Cancel button)
-    document.getElementById('spcn-cancel')?.addEventListener('click', () => this.hideSPCNForm());
-    document.getElementById('spcn-cancel-2')?.addEventListener('click', () => this.hideSPCNForm());
-    document.getElementById('rack-cancel')?.addEventListener('click', () => this.hideRackForm());
-    document.getElementById('rack-cancel-2')?.addEventListener('click', () => this.hideRackForm());
+    // Cancel buttons
+    document.getElementById('spcn-cancel')?.addEventListener('click', () => this.showListView());
+    document.getElementById('rack-cancel')?.addEventListener('click', () => this.showListView());
 
-    // Click outside modal to close
-    document.getElementById('spcn-form-container')?.addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) this.hideSPCNForm();
-    });
-    document.getElementById('rack-form-container')?.addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) this.hideRackForm();
-    });
+    // Node count +/- buttons
+    document.getElementById('nodes-decrease')?.addEventListener('click', () => this.adjustNodeCount(-1));
+    document.getElementById('nodes-increase')?.addEventListener('click', () => this.adjustNodeCount(1));
+    document.getElementById('rack-nodes')?.addEventListener('change', () => this.updateRackCalc());
+  },
 
-    // Live calculation updates
-    document.getElementById('spcn-cooling')?.addEventListener('change', () => this.updateSPCNCalc());
-    document.getElementById('spcn-power')?.addEventListener('change', () => this.updateSPCNCalc());
-    document.getElementById('spcn-network')?.addEventListener('change', () => this.updateSPCNCalc());
-    document.getElementById('spcn-redundancy')?.addEventListener('change', () => this.updateSPCNCalc());
-    document.getElementById('spcn-size')?.addEventListener('change', () => this.updateSPCNCalc());
+  // View switching
+  showListView(): void {
+    this.currentView = 'list';
+    document.getElementById('design-list-view')?.classList.add('active');
+    document.getElementById('design-dc-view')?.classList.remove('active');
+    document.getElementById('design-rack-view')?.classList.remove('active');
+  },
 
-    document.getElementById('rack-type')?.addEventListener('change', () => this.updateRackTiers());
-    document.getElementById('rack-tier')?.addEventListener('change', () => this.updateRackNodeSlider());
-    document.getElementById('rack-nodes')?.addEventListener('input', () => this.updateRackCalc());
+  showDCDesignView(): void {
+    this.currentView = 'dc';
+    document.getElementById('design-list-view')?.classList.remove('active');
+    document.getElementById('design-dc-view')?.classList.add('active');
+    document.getElementById('design-rack-view')?.classList.remove('active');
+
+    // Reset form
+    (document.getElementById('spcn-name') as HTMLInputElement).value = '';
+    (document.getElementById('spcn-size') as HTMLInputElement).value = '';
+    (document.getElementById('spcn-power') as HTMLInputElement).value = '';
+    (document.getElementById('spcn-cooling') as HTMLInputElement).value = '';
+    (document.getElementById('spcn-network') as HTMLInputElement).value = '';
+    (document.getElementById('spcn-redundancy') as HTMLInputElement).value = '';
+
+    this.populateSPCNOptions();
+    this.updateSPCNCalc();
+  },
+
+  showRackDesignView(): void {
+    this.currentView = 'rack';
+    document.getElementById('design-list-view')?.classList.remove('active');
+    document.getElementById('design-dc-view')?.classList.remove('active');
+    document.getElementById('design-rack-view')?.classList.add('active');
+
+    // Reset form
+    (document.getElementById('rack-name') as HTMLInputElement).value = '';
+    (document.getElementById('rack-type') as HTMLInputElement).value = '';
+    (document.getElementById('rack-tier') as HTMLInputElement).value = '';
+
+    this.populateRackTypes();
+    document.getElementById('rack-tier-section')!.style.display = 'none';
+    document.getElementById('rack-nodes-section')!.style.display = 'none';
+    this.updateRackCalc();
   },
 
   // Check if research requirement is met
@@ -370,124 +406,212 @@ export const Designs = {
     return Research.getLevel(req.branch, req.sub) >= req.level;
   },
 
-  // Populate SPCN form dropdowns with research gating
+  // Populate SPCN option cards
   populateSPCNOptions(): void {
-    const coolingSelect = document.getElementById('spcn-cooling') as HTMLSelectElement;
-    const powerSelect = document.getElementById('spcn-power') as HTMLSelectElement;
-    const networkSelect = document.getElementById('spcn-network') as HTMLSelectElement;
-    const redundancySelect = document.getElementById('spcn-redundancy') as HTMLSelectElement;
+    // Size options
+    const sizeContainer = document.getElementById('spcn-size-options');
+    if (sizeContainer) {
+      sizeContainer.innerHTML = DCSizeOptions.map(opt => `
+        <div class="option-card" data-value="${opt.id}" data-field="spcn-size">
+          <div class="option-card-name">${opt.name}</div>
+          <div class="option-card-detail">${opt.tiles} tile${opt.tiles > 1 ? 's' : ''} · ${opt.racksPerTile * opt.tiles} racks</div>
+        </div>
+      `).join('');
+      this.bindOptionCards(sizeContainer, 'spcn-size');
+    }
 
-    if (coolingSelect) {
-      coolingSelect.innerHTML = '<option value="">Select cooling...</option>';
-      CoolingOptions.forEach(opt => {
+    // Power options
+    const powerContainer = document.getElementById('spcn-power-options');
+    if (powerContainer) {
+      powerContainer.innerHTML = PowerDensityOptions.map(opt => {
         const researched = this.isResearched(opt.researchRequired);
-        coolingSelect.innerHTML += `<option value="${opt.id}" ${!researched ? 'disabled' : ''}>${opt.name}${!researched ? ' (Not Researched)' : ''}</option>`;
-      });
+        return `
+          <div class="option-card ${!researched ? 'disabled' : ''}" data-value="${opt.id}" data-field="spcn-power">
+            <div class="option-card-name">${opt.name}</div>
+            <div class="option-card-detail">$${(opt.costPerKW / 1000).toFixed(1)}K/kW</div>
+            ${!researched ? '<div class="option-card-locked">Not Researched</div>' : ''}
+          </div>
+        `;
+      }).join('');
+      this.bindOptionCards(powerContainer, 'spcn-power');
     }
 
-    if (powerSelect) {
-      powerSelect.innerHTML = '<option value="">Select power density...</option>';
-      PowerDensityOptions.forEach(opt => {
+    // Cooling options
+    const coolingContainer = document.getElementById('spcn-cooling-options');
+    if (coolingContainer) {
+      coolingContainer.innerHTML = CoolingOptions.map(opt => {
         const researched = this.isResearched(opt.researchRequired);
-        powerSelect.innerHTML += `<option value="${opt.id}" ${!researched ? 'disabled' : ''}>${opt.name}${!researched ? ' (Not Researched)' : ''}</option>`;
-      });
+        return `
+          <div class="option-card ${!researched ? 'disabled' : ''}" data-value="${opt.id}" data-field="spcn-cooling">
+            <div class="option-card-name">${opt.name}</div>
+            <div class="option-card-detail">PUE ${opt.pue}</div>
+            ${!researched ? '<div class="option-card-locked">Not Researched</div>' : ''}
+          </div>
+        `;
+      }).join('');
+      this.bindOptionCards(coolingContainer, 'spcn-cooling');
     }
 
-    if (networkSelect) {
-      networkSelect.innerHTML = '<option value="">Select network...</option>';
-      NetworkOptions.forEach(opt => {
+    // Network options
+    const networkContainer = document.getElementById('spcn-network-options');
+    if (networkContainer) {
+      networkContainer.innerHTML = NetworkOptions.map(opt => {
         const researched = this.isResearched(opt.researchRequired);
-        networkSelect.innerHTML += `<option value="${opt.id}" ${!researched ? 'disabled' : ''}>${opt.name}${!researched ? ' (Not Researched)' : ''}</option>`;
-      });
+        return `
+          <div class="option-card ${!researched ? 'disabled' : ''}" data-value="${opt.id}" data-field="spcn-network">
+            <div class="option-card-name">${opt.name}</div>
+            <div class="option-card-detail">${opt.speed} Gbps</div>
+            ${!researched ? '<div class="option-card-locked">Not Researched</div>' : ''}
+          </div>
+        `;
+      }).join('');
+      this.bindOptionCards(networkContainer, 'spcn-network');
     }
 
-    if (redundancySelect) {
-      redundancySelect.innerHTML = '';
-      PowerRedundancyOptions.forEach(opt => {
-        redundancySelect.innerHTML += `<option value="${opt.id}">${opt.name}</option>`;
-      });
-    }
-
-    const sizeSelect = document.getElementById('spcn-size') as HTMLSelectElement;
-    if (sizeSelect) {
-      sizeSelect.innerHTML = '<option value="">Select size...</option>';
-      DCSizeOptions.forEach(opt => {
-        sizeSelect.innerHTML += `<option value="${opt.id}">${opt.name}</option>`;
-      });
+    // Redundancy options
+    const redundancyContainer = document.getElementById('spcn-redundancy-options');
+    if (redundancyContainer) {
+      redundancyContainer.innerHTML = PowerRedundancyOptions.map(opt => `
+        <div class="option-card" data-value="${opt.id}" data-field="spcn-redundancy">
+          <div class="option-card-name">${opt.name}</div>
+          <div class="option-card-detail">${opt.costMult}x cost · ${opt.reliability}% reliability</div>
+        </div>
+      `).join('');
+      this.bindOptionCards(redundancyContainer, 'spcn-redundancy');
     }
   },
 
-  // Populate rack type dropdown
-  populateRackTypes(): void {
-    const typeSelect = document.getElementById('rack-type') as HTMLSelectElement;
-    if (typeSelect) {
-      typeSelect.innerHTML = '<option value="">Select type...</option>';
-      RackTypeOptions.forEach(type => {
-        // Check if at least one tier is researched
-        const hasResearchedTier = type.tiers.some(t => this.isResearched(t.researchRequired));
-        typeSelect.innerHTML += `<option value="${type.id}" ${!hasResearchedTier ? 'disabled' : ''}>${type.name}${!hasResearchedTier ? ' (Not Researched)' : ''}</option>`;
+  // Bind click events to option cards
+  bindOptionCards(container: HTMLElement, fieldId: string): void {
+    container.querySelectorAll('.option-card').forEach(card => {
+      card.addEventListener('click', () => {
+        if (card.classList.contains('disabled')) return;
+
+        // Deselect all in this group
+        container.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+
+        // Select this one
+        card.classList.add('selected');
+
+        // Update hidden input
+        const value = (card as HTMLElement).dataset.value || '';
+        (document.getElementById(fieldId) as HTMLInputElement).value = value;
+
+        // Update calculations
+        if (fieldId.startsWith('spcn')) {
+          this.updateSPCNCalc();
+        } else if (fieldId === 'rack-type') {
+          this.updateRackTiers();
+        } else if (fieldId === 'rack-tier') {
+          this.updateRackNodeSection();
+        }
       });
+    });
+  },
+
+  // Populate rack type option cards
+  populateRackTypes(): void {
+    const typeContainer = document.getElementById('rack-type-options');
+    if (typeContainer) {
+      typeContainer.innerHTML = RackTypeOptions.map(type => {
+        const hasResearchedTier = type.tiers.some(t => this.isResearched(t.researchRequired));
+        const tierCount = type.tiers.filter(t => this.isResearched(t.researchRequired)).length;
+        return `
+          <div class="option-card ${!hasResearchedTier ? 'disabled' : ''}" data-value="${type.id}" data-field="rack-type">
+            <div class="option-card-name">${type.name}</div>
+            <div class="option-card-detail">${tierCount} tier${tierCount !== 1 ? 's' : ''} available</div>
+            ${!hasResearchedTier ? '<div class="option-card-locked">Not Researched</div>' : ''}
+          </div>
+        `;
+      }).join('');
+      this.bindOptionCards(typeContainer, 'rack-type');
     }
   },
 
   // Update rack tiers based on selected type
   updateRackTiers(): void {
-    const typeSelect = document.getElementById('rack-type') as HTMLSelectElement;
-    const tierSelect = document.getElementById('rack-tier') as HTMLSelectElement;
+    const typeValue = (document.getElementById('rack-type') as HTMLInputElement)?.value;
+    const tierSection = document.getElementById('rack-tier-section');
+    const tierContainer = document.getElementById('rack-tier-options');
 
-    if (!typeSelect || !tierSelect) return;
+    if (!tierSection || !tierContainer) return;
 
-    const selectedType = RackTypeOptions.find(t => t.id === typeSelect.value);
-    tierSelect.innerHTML = '<option value="">Select tier...</option>';
+    const selectedType = RackTypeOptions.find(t => t.id === typeValue);
 
     if (selectedType) {
-      selectedType.tiers.forEach(tier => {
+      tierSection.style.display = 'block';
+      tierContainer.innerHTML = selectedType.tiers.map(tier => {
         const researched = this.isResearched(tier.researchRequired);
-        tierSelect.innerHTML += `<option value="${tier.id}" ${!researched ? 'disabled' : ''}>${tier.name}${!researched ? ' (Not Researched)' : ''}</option>`;
-      });
+        const fmt = (n: number) => n >= 1000 ? `$${(n/1000).toFixed(0)}K` : `$${n}`;
+        return `
+          <div class="option-card ${!researched ? 'disabled' : ''}" data-value="${tier.id}" data-field="rack-tier">
+            <div class="option-card-name">${tier.name}</div>
+            <div class="option-card-detail">${tier.kwPerNode} kW/node · ${fmt(tier.costPerNode)}/node</div>
+            ${!researched ? '<div class="option-card-locked">Not Researched</div>' : ''}
+          </div>
+        `;
+      }).join('');
+      this.bindOptionCards(tierContainer, 'rack-tier');
+    } else {
+      tierSection.style.display = 'none';
     }
 
-    // Hide node slider until tier is selected
-    const nodesGroup = document.getElementById('rack-nodes-group');
-    if (nodesGroup) nodesGroup.style.display = 'none';
+    // Reset tier selection and hide nodes
+    (document.getElementById('rack-tier') as HTMLInputElement).value = '';
+    document.getElementById('rack-nodes-section')!.style.display = 'none';
 
     this.updateRackCalc();
   },
 
-  // Update node slider based on selected tier
-  updateRackNodeSlider(): void {
-    const typeSelect = document.getElementById('rack-type') as HTMLSelectElement;
-    const tierSelect = document.getElementById('rack-tier') as HTMLSelectElement;
-    const nodesSlider = document.getElementById('rack-nodes') as HTMLInputElement;
-    const nodesValue = document.getElementById('rack-nodes-value');
-    const nodesGroup = document.getElementById('rack-nodes-group');
+  // Update node count section based on selected tier
+  updateRackNodeSection(): void {
+    const typeValue = (document.getElementById('rack-type') as HTMLInputElement)?.value;
+    const tierValue = (document.getElementById('rack-tier') as HTMLInputElement)?.value;
+    const nodesSection = document.getElementById('rack-nodes-section');
+    const nodesInput = document.getElementById('rack-nodes') as HTMLInputElement;
+    const rangeHint = document.getElementById('node-range-hint');
 
-    if (!typeSelect || !tierSelect || !nodesSlider || !nodesGroup) return;
+    if (!nodesSection || !nodesInput) return;
 
-    const selectedType = RackTypeOptions.find(t => t.id === typeSelect.value);
-    const selectedTier = selectedType?.tiers.find(t => t.id === tierSelect.value);
+    const selectedType = RackTypeOptions.find(t => t.id === typeValue);
+    const selectedTier = selectedType?.tiers.find(t => t.id === tierValue);
 
     if (selectedTier) {
-      // Show and configure the slider
-      nodesGroup.style.display = 'block';
-      nodesSlider.min = String(selectedTier.minNodes);
-      nodesSlider.max = String(selectedTier.maxNodes);
-      nodesSlider.value = String(selectedTier.defaultNodes);
-      if (nodesValue) nodesValue.textContent = String(selectedTier.defaultNodes);
+      nodesSection.style.display = 'block';
+      nodesInput.min = String(selectedTier.minNodes);
+      nodesInput.max = String(selectedTier.maxNodes);
+      nodesInput.value = String(selectedTier.defaultNodes);
+      if (rangeHint) {
+        rangeHint.textContent = `Range: ${selectedTier.minNodes} - ${selectedTier.maxNodes} nodes`;
+      }
     } else {
-      nodesGroup.style.display = 'none';
+      nodesSection.style.display = 'none';
     }
 
+    this.updateRackCalc();
+  },
+
+  // Adjust node count with +/- buttons
+  adjustNodeCount(delta: number): void {
+    const nodesInput = document.getElementById('rack-nodes') as HTMLInputElement;
+    if (!nodesInput) return;
+
+    const min = parseInt(nodesInput.min) || 1;
+    const max = parseInt(nodesInput.max) || 42;
+    const current = parseInt(nodesInput.value) || min;
+    const newValue = Math.max(min, Math.min(max, current + delta));
+
+    nodesInput.value = String(newValue);
     this.updateRackCalc();
   },
 
   // Calculate and display SPCN stats
   updateSPCNCalc(): void {
-    const cooling = CoolingOptions.find(c => c.id === (document.getElementById('spcn-cooling') as HTMLSelectElement)?.value);
-    const power = PowerDensityOptions.find(p => p.id === (document.getElementById('spcn-power') as HTMLSelectElement)?.value);
-    const network = NetworkOptions.find(n => n.id === (document.getElementById('spcn-network') as HTMLSelectElement)?.value);
-    const redundancy = PowerRedundancyOptions.find(r => r.id === (document.getElementById('spcn-redundancy') as HTMLSelectElement)?.value);
-    const size = DCSizeOptions.find(s => s.id === (document.getElementById('spcn-size') as HTMLSelectElement)?.value);
+    const cooling = CoolingOptions.find(c => c.id === (document.getElementById('spcn-cooling') as HTMLInputElement)?.value);
+    const power = PowerDensityOptions.find(p => p.id === (document.getElementById('spcn-power') as HTMLInputElement)?.value);
+    const network = NetworkOptions.find(n => n.id === (document.getElementById('spcn-network') as HTMLInputElement)?.value);
+    const redundancy = PowerRedundancyOptions.find(r => r.id === (document.getElementById('spcn-redundancy') as HTMLInputElement)?.value);
+    const size = DCSizeOptions.find(s => s.id === (document.getElementById('spcn-size') as HTMLInputElement)?.value);
 
     const calcEl = document.getElementById('spcn-calc');
     if (!calcEl) return;
@@ -594,24 +718,22 @@ export const Designs = {
 
   // Calculate and display rack stats
   updateRackCalc(): void {
-    const typeSelect = document.getElementById('rack-type') as HTMLSelectElement;
-    const tierSelect = document.getElementById('rack-tier') as HTMLSelectElement;
-    const nodesSlider = document.getElementById('rack-nodes') as HTMLInputElement;
-    const nodesValue = document.getElementById('rack-nodes-value');
+    const typeInput = document.getElementById('rack-type') as HTMLInputElement;
+    const tierInput = document.getElementById('rack-tier') as HTMLInputElement;
+    const nodesInput = document.getElementById('rack-nodes') as HTMLInputElement;
     const calcEl = document.getElementById('rack-calc');
 
     if (!calcEl) return;
 
-    const selectedType = RackTypeOptions.find(t => t.id === typeSelect?.value);
-    const selectedTier = selectedType?.tiers.find(t => t.id === tierSelect?.value);
+    const selectedType = RackTypeOptions.find(t => t.id === typeInput?.value);
+    const selectedTier = selectedType?.tiers.find(t => t.id === tierInput?.value);
 
     if (!selectedTier) {
       calcEl.innerHTML = '<div class="calc-placeholder">Select type and tier to see calculations</div>';
       return;
     }
 
-    const nodeCount = nodesSlider ? Number(nodesSlider.value) : selectedTier.defaultNodes;
-    if (nodesValue) nodesValue.textContent = String(nodeCount);
+    const nodeCount = nodesInput ? Number(nodesInput.value) : selectedTier.defaultNodes;
 
     const totalKw = selectedTier.kwPerNode * nodeCount;
     const totalRevenue = selectedTier.revenuePerNode * nodeCount;
@@ -687,35 +809,13 @@ export const Designs = {
     `;
   },
 
-  showSPCNForm(): void {
-    this.populateSPCNOptions();
-    this.updateSPCNCalc();
-    document.getElementById('spcn-form-container')?.classList.add('active');
-    (document.getElementById('spcn-name') as HTMLInputElement).value = '';
-  },
-
-  hideSPCNForm(): void {
-    document.getElementById('spcn-form-container')?.classList.remove('active');
-  },
-
-  showRackForm(): void {
-    this.populateRackTypes();
-    this.updateRackCalc();
-    document.getElementById('rack-form-container')?.classList.add('active');
-    (document.getElementById('rack-name') as HTMLInputElement).value = '';
-  },
-
-  hideRackForm(): void {
-    document.getElementById('rack-form-container')?.classList.remove('active');
-  },
-
   saveSPCNDesign(): void {
     const name = (document.getElementById('spcn-name') as HTMLInputElement)?.value.trim();
-    const cooling = (document.getElementById('spcn-cooling') as HTMLSelectElement)?.value;
-    const power = (document.getElementById('spcn-power') as HTMLSelectElement)?.value;
-    const network = (document.getElementById('spcn-network') as HTMLSelectElement)?.value;
-    const redundancy = (document.getElementById('spcn-redundancy') as HTMLSelectElement)?.value;
-    const sizeId = (document.getElementById('spcn-size') as HTMLSelectElement)?.value;
+    const cooling = (document.getElementById('spcn-cooling') as HTMLInputElement)?.value;
+    const power = (document.getElementById('spcn-power') as HTMLInputElement)?.value;
+    const network = (document.getElementById('spcn-network') as HTMLInputElement)?.value;
+    const redundancy = (document.getElementById('spcn-redundancy') as HTMLInputElement)?.value;
+    const sizeId = (document.getElementById('spcn-size') as HTMLInputElement)?.value;
 
     if (!name || !cooling || !power || !network || !redundancy || !sizeId) return;
 
@@ -764,21 +864,21 @@ export const Designs = {
     };
 
     this.spcnDesigns.push(design);
-    this.hideSPCNForm();
+    this.showListView();
     this.render();
   },
 
   saveRackDesign(): void {
     const name = (document.getElementById('rack-name') as HTMLInputElement)?.value.trim();
-    const type = (document.getElementById('rack-type') as HTMLSelectElement)?.value;
-    const tier = (document.getElementById('rack-tier') as HTMLSelectElement)?.value;
-    const nodesSlider = document.getElementById('rack-nodes') as HTMLInputElement;
+    const type = (document.getElementById('rack-type') as HTMLInputElement)?.value;
+    const tier = (document.getElementById('rack-tier') as HTMLInputElement)?.value;
+    const nodesInput = document.getElementById('rack-nodes') as HTMLInputElement;
 
     if (!name || !type || !tier) return;
 
     const typeOpt = RackTypeOptions.find(t => t.id === type)!;
     const tierOpt = typeOpt.tiers.find(t => t.id === tier)!;
-    const nodeCount = nodesSlider ? Number(nodesSlider.value) : tierOpt.defaultNodes;
+    const nodeCount = nodesInput ? Number(nodesInput.value) : tierOpt.defaultNodes;
 
     const kwPerRack = tierOpt.kwPerNode * nodeCount;
     const capexPerRack = tierOpt.costPerNode * nodeCount;
@@ -801,7 +901,7 @@ export const Designs = {
     };
 
     this.rackDesigns.push(design);
-    this.hideRackForm();
+    this.showListView();
     this.render();
   },
 

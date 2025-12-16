@@ -1,6 +1,6 @@
 // Campus View - UI for managing a campus with new placement flow
 import { Campus, CampusManager, Datacenter } from './campus';
-import { Designs, DCSizeOptions, SPCNDesign } from './designs';
+import { Designs, DCSizeOptions, SPCNDesign, RackDesign } from './designs';
 
 // Game reference for navigation
 let gameRef: {
@@ -384,13 +384,21 @@ export const CampusView = {
 
 // ============================================
 // DC View - For placing racks inside a DC
+// Click-to-place system matching DC placement flow
 // ============================================
+
+// Floor constants
+const TILES_PER_FLOOR = 100;  // Up to 100 tiles per floor for standard DCs
+const RACKS_PER_TILE = 50;    // 50 racks per tile
 
 export const DCView = {
   currentCampus: null as Campus | null,
   currentDC: null as Datacenter | null,
-  selectedRackDesign: null as any | null,
-  rackCount: 1,
+  selectedRackDesign: null as RackDesign | null,
+  hoverSlot: null as number | null,
+  currentFloor: 1,
+  totalFloors: 1,
+  racksPerFloor: 50,
 
   // DOM elements
   view: null as HTMLElement | null,
@@ -402,9 +410,7 @@ export const DCView = {
   mwTotalEl: null as HTMLElement | null,
   designPicker: null as HTMLElement | null,
   rackList: null as HTMLElement | null,
-  placementConfirm: null as HTMLElement | null,
-  placementLabel: null as HTMLElement | null,
-  placementCost: null as HTMLElement | null,
+  floorSelector: null as HTMLElement | null,
 
   init(): void {
     this.view = document.getElementById('view-dc');
@@ -416,22 +422,63 @@ export const DCView = {
     this.mwTotalEl = document.getElementById('dc-mw-total');
     this.designPicker = document.getElementById('rack-design-picker');
     this.rackList = document.getElementById('dc-rack-list');
-    this.placementConfirm = document.getElementById('rack-placement-confirm');
-    this.placementLabel = document.getElementById('rack-placement-label');
-    this.placementCost = document.getElementById('rack-placement-cost');
+    this.floorSelector = document.getElementById('dc-floor-selector');
 
     this.bindEvents();
   },
 
+  // Calculate floor info for a DC
+  getFloorInfo(dc: Datacenter): { totalFloors: number; racksPerFloor: number; isEdge: boolean } {
+    const design = Designs.spcnDesigns.find(d => d.id === dc.designId);
+    const totalRacks = dc.rackSlots?.length || design?.totalRacks || 50;
+    const isEdge = design?.size === '1x1';
+
+    if (isEdge) {
+      // Edge DC: single floor with all racks (50)
+      return { totalFloors: 1, racksPerFloor: totalRacks, isEdge: true };
+    }
+
+    // Standard DCs: up to 100 tiles per floor = 5000 racks per floor
+    const maxRacksPerFloor = TILES_PER_FLOOR * RACKS_PER_TILE;
+    const totalFloors = Math.ceil(totalRacks / maxRacksPerFloor);
+    const racksPerFloor = totalFloors === 1 ? totalRacks : maxRacksPerFloor;
+
+    return { totalFloors, racksPerFloor, isEdge: false };
+  },
+
+  // Get rack slot range for a specific floor
+  getFloorSlotRange(floor: number): { start: number; end: number } {
+    if (!this.currentDC) return { start: 0, end: 0 };
+
+    const totalRacks = this.currentDC.rackSlots?.length || 0;
+    const { racksPerFloor, isEdge } = this.getFloorInfo(this.currentDC);
+
+    if (isEdge || this.totalFloors === 1) {
+      return { start: 0, end: totalRacks };
+    }
+
+    const start = (floor - 1) * racksPerFloor;
+    const end = Math.min(floor * racksPerFloor, totalRacks);
+
+    return { start, end };
+  },
+
   bindEvents(): void {
     document.getElementById('dc-back-btn')?.addEventListener('click', () => this.close());
-    document.getElementById('confirm-rack-place')?.addEventListener('click', () => this.confirmPlacement());
-    document.getElementById('cancel-rack-place')?.addEventListener('click', () => this.cancelPlacement());
     document.getElementById('goto-design-tab-2')?.addEventListener('click', (e) => {
       e.preventDefault();
       this.close();
       CampusView.close();
       gameRef?.switchTab('design');
+    });
+
+    // ESC to deselect design
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.selectedRackDesign && this.view?.classList.contains('active')) {
+        this.selectedRackDesign = null;
+        this.renderDesignPicker();
+        this.renderGrid();
+      }
     });
   },
 
@@ -439,8 +486,13 @@ export const DCView = {
     this.currentCampus = campus;
     this.currentDC = dc;
     this.selectedRackDesign = null;
-    this.rackCount = 1;
-    this.hidePlacementConfirm();
+    this.hoverSlot = null;
+
+    // Initialize floor info
+    const floorInfo = this.getFloorInfo(dc);
+    this.totalFloors = floorInfo.totalFloors;
+    this.racksPerFloor = floorInfo.racksPerFloor;
+    this.currentFloor = 1;
 
     this.render();
     this.view?.classList.add('active');
@@ -449,58 +501,167 @@ export const DCView = {
   close(): void {
     this.view?.classList.remove('active');
     this.currentDC = null;
+    this.selectedRackDesign = null;
     gameRef?.showView('campus');
   },
 
   render(): void {
     if (!this.currentDC) return;
 
-    const design = Designs.spcnDesigns.find(d => d.id === this.currentDC!.designId);
-    const totalRacks = design?.totalRacks || 0;
-    const totalMW = design?.totalMW || 0;
-
-    // Calculate used racks and MW
-    let usedRacks = 0;
-    let usedMW = 0;
-    for (const installed of this.currentDC.installedRacks) {
-      const rackDesign = Designs.rackDesigns.find(r => r.id === installed.designId);
-      if (rackDesign) {
-        usedRacks += installed.count;
-        usedMW += (rackDesign.kwPerRack * installed.count) / 1000;
-      }
-    }
+    const stats = CampusManager.getDCStats(this.currentDC);
 
     // Update header
     if (this.titleEl) this.titleEl.textContent = this.currentDC.name;
-    if (this.racksUsedEl) this.racksUsedEl.textContent = String(usedRacks);
-    if (this.racksTotalEl) this.racksTotalEl.textContent = String(totalRacks);
-    if (this.mwUsedEl) this.mwUsedEl.textContent = usedMW.toFixed(1);
-    if (this.mwTotalEl) this.mwTotalEl.textContent = totalMW.toFixed(1);
+    if (this.racksUsedEl) this.racksUsedEl.textContent = String(stats.usedSlots);
+    if (this.racksTotalEl) this.racksTotalEl.textContent = String(stats.totalSlots);
+    if (this.mwUsedEl) this.mwUsedEl.textContent = stats.usedMW.toFixed(1);
+    if (this.mwTotalEl) this.mwTotalEl.textContent = stats.totalMW.toFixed(1);
 
-    this.renderGrid(usedRacks, totalRacks);
+    this.renderFloorSelector();
+    this.renderGrid();
     this.renderDesignPicker();
     this.renderRackList();
   },
 
-  renderGrid(usedRacks: number, totalRacks: number): void {
+  renderFloorSelector(): void {
+    if (!this.floorSelector) return;
+
+    // Build floor buttons (show floors in reverse order - top floor first)
+    let html = '<div class="floor-label">Floor</div>';
+
+    for (let f = this.totalFloors; f >= 1; f--) {
+      const isActive = f === this.currentFloor;
+      html += `
+        <button class="floor-btn ${isActive ? 'active' : ''}" data-floor="${f}">
+          <span class="floor-num">${f}</span>
+        </button>
+      `;
+    }
+
+    this.floorSelector.innerHTML = html;
+
+    // Bind click handlers
+    this.floorSelector.querySelectorAll('.floor-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const floor = parseInt((btn as HTMLElement).dataset.floor || '1', 10);
+        this.selectFloor(floor);
+      });
+    });
+  },
+
+  selectFloor(floor: number): void {
+    if (floor < 1 || floor > this.totalFloors) return;
+    this.currentFloor = floor;
+    this.renderFloorSelector();
+    this.renderGrid();
+  },
+
+  renderGrid(): void {
     if (!this.grid || !this.currentDC) return;
 
-    // Create a visual representation of rack slots
+    const dc = this.currentDC;
+    // Safety check for rackSlots
+    if (!dc.rackSlots) {
+      const design = Designs.spcnDesigns.find(d => d.id === dc.designId);
+      dc.rackSlots = new Array(design?.totalRacks || 50).fill(null);
+    }
+
+    // Get slot range for current floor
+    const { start, end } = this.getFloorSlotRange(this.currentFloor);
+
     // Use a grid of 10 columns
     const cols = 10;
 
     this.grid.innerHTML = '';
     this.grid.style.gridTemplateColumns = `repeat(${cols}, 24px)`;
 
-    for (let i = 0; i < totalRacks; i++) {
+    // Only render slots for the current floor
+    for (let i = start; i < end; i++) {
       const slot = document.createElement('div');
       slot.className = 'rack-slot';
-      if (i < usedRacks) {
+      slot.dataset.slot = String(i);
+
+      const designId = dc.rackSlots[i];
+
+      if (designId !== null) {
+        // Slot is filled
         slot.classList.add('rack-filled');
+        const rackDesign = Designs.rackDesigns.find(r => r.id === designId);
+        if (rackDesign) {
+          // Color code by rack type
+          slot.classList.add(`rack-type-${rackDesign.type}`);
+          slot.title = `${rackDesign.name} (${rackDesign.kwPerRack.toFixed(1)} kW)`;
+        }
       } else {
+        // Slot is empty
         slot.classList.add('rack-empty');
+
+        // If a design is selected, make this slot clickable
+        if (this.selectedRackDesign) {
+          slot.classList.add('rack-placeable');
+          slot.addEventListener('click', () => this.onSlotClick(i));
+          slot.addEventListener('mouseenter', () => this.onSlotHover(i));
+          slot.addEventListener('mouseleave', () => this.onSlotLeave());
+        }
       }
+
+      // Show hover preview
+      if (this.hoverSlot === i && this.selectedRackDesign) {
+        slot.classList.add('rack-preview');
+      }
+
       this.grid.appendChild(slot);
+    }
+  },
+
+  onSlotClick(slotIndex: number): void {
+    if (!this.selectedRackDesign || !this.currentDC || !this.currentCampus) return;
+
+    // Check MW capacity before placing
+    const stats = CampusManager.getDCStats(this.currentDC);
+    const newMW = this.selectedRackDesign.kwPerRack / 1000;
+
+    if (stats.usedMW + newMW > stats.totalMW) {
+      alert(`Insufficient power capacity. Need ${newMW.toFixed(2)} MW, have ${(stats.totalMW - stats.usedMW).toFixed(2)} MW available.`);
+      return;
+    }
+
+    // Check if player can afford the rack (CapEx)
+    const cost = this.selectedRackDesign.capexPerRack;
+    if (gameRef && cost > gameRef.capital) {
+      alert(`Insufficient capital. Need $${(cost / 1000).toFixed(0)}K`);
+      return;
+    }
+
+    // Install the rack
+    const success = CampusManager.installRack(
+      this.currentCampus.id,
+      this.currentDC.id,
+      slotIndex,
+      this.selectedRackDesign.id
+    );
+
+    if (success) {
+      // Deduct cost
+      if (gameRef) {
+        gameRef.capital -= cost;
+        gameRef.updateCapitalDisplay();
+      }
+      this.hoverSlot = null;
+      this.render();
+    }
+  },
+
+  onSlotHover(slotIndex: number): void {
+    if (!this.selectedRackDesign) return;
+    this.hoverSlot = slotIndex;
+    this.renderGrid();
+  },
+
+  onSlotLeave(): void {
+    if (this.hoverSlot !== null) {
+      this.hoverSlot = null;
+      this.renderGrid();
     }
   },
 
@@ -521,12 +682,13 @@ export const DCView = {
 
     this.designPicker.innerHTML = designs.map(d => {
       const isSelected = this.selectedRackDesign?.id === d.id;
+      const costStr = d.capexPerRack >= 1000 ? `$${(d.capexPerRack / 1000).toFixed(0)}K` : `$${d.capexPerRack}`;
       return `
         <div class="design-pick-card ${isSelected ? 'selected' : ''}" data-design-id="${d.id}">
           <div class="design-pick-name">${d.name}</div>
           <div class="design-pick-specs">
             <span>${d.kwPerRack.toFixed(1)} kW</span>
-            <span>$${(d.revenuePerRack / 1000).toFixed(0)}K/mo</span>
+            <span>${costStr}</span>
           </div>
         </div>
       `;
@@ -541,118 +703,54 @@ export const DCView = {
     });
   },
 
+  selectDesign(designId: string | null): void {
+    if (designId) {
+      const design = Designs.rackDesigns.find(d => d.id === designId);
+      // Toggle selection
+      if (this.selectedRackDesign?.id === designId) {
+        this.selectedRackDesign = null;
+      } else {
+        this.selectedRackDesign = design || null;
+      }
+    } else {
+      this.selectedRackDesign = null;
+    }
+    this.hoverSlot = null;
+    this.renderDesignPicker();
+    this.renderGrid();
+  },
+
   renderRackList(): void {
     if (!this.rackList || !this.currentDC) return;
 
-    const installed = this.currentDC.installedRacks;
-    if (installed.length === 0) {
+    // Safety check for rackSlots
+    const rackSlots = this.currentDC.rackSlots || [];
+
+    // Count racks by design
+    const rackCounts: { [designId: string]: number } = {};
+    for (const designId of rackSlots) {
+      if (designId !== null) {
+        rackCounts[designId] = (rackCounts[designId] || 0) + 1;
+      }
+    }
+
+    const entries = Object.entries(rackCounts);
+    if (entries.length === 0) {
       this.rackList.innerHTML = '<div class="empty-list">No racks installed yet</div>';
       return;
     }
 
-    this.rackList.innerHTML = installed.map(inst => {
-      const design = Designs.rackDesigns.find(d => d.id === inst.designId);
+    this.rackList.innerHTML = entries.map(([designId, count]) => {
+      const design = Designs.rackDesigns.find(d => d.id === designId);
       return `
         <div class="built-item">
           <div class="built-item-name">${design?.name || 'Unknown'}</div>
           <div class="built-item-specs">
-            <span>x${inst.count}</span>
-            <span>${((design?.kwPerRack || 0) * inst.count / 1000).toFixed(2)} MW</span>
+            <span>x${count}</span>
+            <span>${((design?.kwPerRack || 0) * count / 1000).toFixed(2)} MW</span>
           </div>
         </div>
       `;
     }).join('');
-  },
-
-  selectDesign(designId: string | null): void {
-    if (designId) {
-      this.selectedRackDesign = Designs.rackDesigns.find(d => d.id === designId) || null;
-      if (this.selectedRackDesign) {
-        this.showPlacementConfirm();
-      }
-    } else {
-      this.selectedRackDesign = null;
-      this.hidePlacementConfirm();
-    }
-    this.renderDesignPicker();
-  },
-
-  showPlacementConfirm(): void {
-    if (!this.placementConfirm || !this.selectedRackDesign || !this.currentDC) return;
-
-    // Calculate available slots
-    const design = Designs.spcnDesigns.find(d => d.id === this.currentDC!.designId);
-    const totalRacks = design?.totalRacks || 0;
-    let usedRacks = 0;
-    for (const inst of this.currentDC.installedRacks) {
-      usedRacks += inst.count;
-    }
-    const available = totalRacks - usedRacks;
-
-    if (available <= 0) {
-      alert('No rack slots available');
-      this.hidePlacementConfirm();
-      return;
-    }
-
-    // Default to filling all available or 10, whichever is smaller
-    this.rackCount = Math.min(available, 10);
-
-    this.updatePlacementInfo();
-    this.placementConfirm.classList.add('active');
-  },
-
-  updatePlacementInfo(): void {
-    if (this.placementLabel) {
-      this.placementLabel.textContent = `x${this.rackCount}`;
-    }
-    // For now, rack installation is free (just takes up slots)
-    if (this.placementCost) {
-      this.placementCost.textContent = `${(this.selectedRackDesign?.kwPerRack * this.rackCount / 1000).toFixed(2)} MW`;
-    }
-  },
-
-  hidePlacementConfirm(): void {
-    this.placementConfirm?.classList.remove('active');
-  },
-
-  confirmPlacement(): void {
-    if (!this.currentDC || !this.selectedRackDesign || !this.currentCampus) return;
-
-    // Check MW capacity
-    const dcDesign = Designs.spcnDesigns.find(d => d.id === this.currentDC!.designId);
-    const totalMW = dcDesign?.totalMW || 0;
-    let usedMW = 0;
-    for (const inst of this.currentDC.installedRacks) {
-      const rd = Designs.rackDesigns.find(r => r.id === inst.designId);
-      if (rd) usedMW += (rd.kwPerRack * inst.count) / 1000;
-    }
-    const newMW = (this.selectedRackDesign.kwPerRack * this.rackCount) / 1000;
-
-    if (usedMW + newMW > totalMW) {
-      alert(`Insufficient power capacity. Need ${newMW.toFixed(2)} MW, have ${(totalMW - usedMW).toFixed(2)} MW available.`);
-      return;
-    }
-
-    // Add racks
-    const existing = this.currentDC.installedRacks.find(r => r.designId === this.selectedRackDesign.id);
-    if (existing) {
-      existing.count += this.rackCount;
-    } else {
-      this.currentDC.installedRacks.push({
-        designId: this.selectedRackDesign.id,
-        count: this.rackCount
-      });
-    }
-
-    this.selectedRackDesign = null;
-    this.hidePlacementConfirm();
-    this.render();
-  },
-
-  cancelPlacement(): void {
-    this.selectedRackDesign = null;
-    this.hidePlacementConfirm();
-    this.renderDesignPicker();
   }
 };

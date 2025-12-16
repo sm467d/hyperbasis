@@ -19,11 +19,12 @@ export interface Datacenter {
   designId: string;        // Reference to SPCNDesign
   position: { x: number; y: number }; // Position within campus grid
   size: { w: number; h: number };     // Footprint in tiles
-  installedRacks: InstalledRack[];
+  // Rack slots: array indexed by slot number, value is RackDesign id or null for empty
+  rackSlots: (string | null)[];
   constructionComplete: boolean;
 }
 
-// Racks installed in a datacenter
+// Legacy interface for backwards compatibility during migration
 export interface InstalledRack {
   designId: string;        // Reference to RackDesign
   count: number;           // How many of this design
@@ -160,13 +161,16 @@ export const CampusManager = {
       }
     }
 
+    // Calculate total rack slots for this DC
+    const totalRackSlots = design.totalRacks;
+
     const datacenter: Datacenter = {
       id: crypto.randomUUID(),
       name,
       designId: design.id,
       position,
       size,
-      installedRacks: [],
+      rackSlots: new Array(totalRackSlots).fill(null), // Initialize empty slots
       constructionComplete: true // Instant for now
     };
 
@@ -194,11 +198,13 @@ export const CampusManager = {
     freeTiles: number;
     totalMW: number;
     totalRacks: number;
+    usedRacks: number;
     dcCount: number;
   } {
     let usedTiles = 0;
     let totalMW = 0;
     let totalRacks = 0;
+    let usedRacks = 0;
 
     for (const dc of campus.datacenters) {
       usedTiles += dc.size.w * dc.size.h;
@@ -207,6 +213,9 @@ export const CampusManager = {
         totalMW += design.totalMW;
         totalRacks += design.totalRacks;
       }
+      // Count used rack slots (with safety check)
+      const rackSlots = dc.rackSlots || [];
+      usedRacks += rackSlots.filter(slot => slot !== null).length;
     }
 
     return {
@@ -215,7 +224,80 @@ export const CampusManager = {
       freeTiles: campus.tiles.length - usedTiles,
       totalMW,
       totalRacks,
+      usedRacks,
       dcCount: campus.datacenters.length
+    };
+  },
+
+  // Install a rack at a specific slot
+  installRack(campusId: string, dcId: string, slotIndex: number, rackDesignId: string): boolean {
+    const campus = this.campuses.find(c => c.id === campusId);
+    if (!campus) return false;
+
+    const dc = campus.datacenters.find(d => d.id === dcId);
+    if (!dc) return false;
+
+    // Check bounds
+    if (slotIndex < 0 || slotIndex >= dc.rackSlots.length) return false;
+
+    // Check if slot is already occupied
+    if (dc.rackSlots[slotIndex] !== null) return false;
+
+    // Install the rack
+    dc.rackSlots[slotIndex] = rackDesignId;
+    return true;
+  },
+
+  // Remove a rack from a specific slot
+  removeRack(campusId: string, dcId: string, slotIndex: number): string | null {
+    const campus = this.campuses.find(c => c.id === campusId);
+    if (!campus) return null;
+
+    const dc = campus.datacenters.find(d => d.id === dcId);
+    if (!dc) return null;
+
+    // Check bounds
+    if (slotIndex < 0 || slotIndex >= dc.rackSlots.length) return null;
+
+    // Get the design that was there
+    const removedDesignId = dc.rackSlots[slotIndex];
+    dc.rackSlots[slotIndex] = null;
+    return removedDesignId;
+  },
+
+  // Get DC stats
+  getDCStats(dc: Datacenter): {
+    totalSlots: number;
+    usedSlots: number;
+    freeSlots: number;
+    usedMW: number;
+    totalMW: number;
+  } {
+    const design = Designs.spcnDesigns.find(d => d.id === dc.designId);
+    const totalMW = design?.totalMW || 0;
+
+    // Safety check for rackSlots
+    const rackSlots = dc.rackSlots || [];
+
+    let usedMW = 0;
+    let usedSlots = 0;
+
+    for (const slotDesignId of rackSlots) {
+      if (slotDesignId !== null) {
+        usedSlots++;
+        const rackDesign = Designs.rackDesigns.find(r => r.id === slotDesignId);
+        if (rackDesign) {
+          usedMW += rackDesign.kwPerRack / 1000; // Convert kW to MW
+        }
+      }
+    }
+
+    return {
+      totalSlots: rackSlots.length,
+      usedSlots,
+      freeSlots: rackSlots.length - usedSlots,
+      usedMW,
+      totalMW
     };
   },
 
@@ -226,6 +308,39 @@ export const CampusManager = {
 
   loadState(state: Campus[]): void {
     this.campuses = state || [];
+
+    // Migrate old format (installedRacks) to new format (rackSlots)
+    for (const campus of this.campuses) {
+      for (const dc of campus.datacenters) {
+        // Check if this DC needs migration (has old format)
+        const dcAny = dc as any;
+        if (!dc.rackSlots && dcAny.installedRacks) {
+          // Get total slots from design
+          const design = Designs.spcnDesigns.find(d => d.id === dc.designId);
+          const totalSlots = design?.totalRacks || 50;
+
+          // Initialize empty slots
+          dc.rackSlots = new Array(totalSlots).fill(null);
+
+          // Migrate old installedRacks to new format
+          let slotIndex = 0;
+          for (const installed of dcAny.installedRacks as InstalledRack[]) {
+            for (let i = 0; i < installed.count && slotIndex < totalSlots; i++) {
+              dc.rackSlots[slotIndex] = installed.designId;
+              slotIndex++;
+            }
+          }
+
+          // Remove old property
+          delete dcAny.installedRacks;
+        } else if (!dc.rackSlots) {
+          // No rackSlots and no installedRacks - initialize empty
+          const design = Designs.spcnDesigns.find(d => d.id === dc.designId);
+          const totalSlots = design?.totalRacks || 50;
+          dc.rackSlots = new Array(totalSlots).fill(null);
+        }
+      }
+    }
   },
 
   reset(): void {
