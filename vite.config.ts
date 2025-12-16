@@ -5,6 +5,15 @@ export default defineConfig({
   base: './',
   publicDir: 'public',
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        format: 'iife',
+        inlineDynamicImports: true,
+        entryFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]'
+      }
+    }
   }
 })
