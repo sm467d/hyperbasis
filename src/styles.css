@@ -1,0 +1,1180 @@
+@font-face {
+    font-family: 'Aptos';
+    src: url('/fonts/Aptos.ttf') format('truetype');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'Aptos';
+    src: url('/fonts/Aptos-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+}
+@font-face {
+    font-family: 'Aptos';
+    src: url('/fonts/Aptos-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Aptos', -apple-system, sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Landing Page (Auth) */
+#landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+#landing h1 {
+    font-size: 42px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+#landing .subtitle {
+    color: #555;
+    margin-bottom: 40px;
+}
+
+.auth-container {
+    background: #111;
+    padding: 30px;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 360px;
+    border: 1px solid #222;
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s;
+}
+
+.auth-tab.active {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+
+.auth-tab:hover {
+    color: #888;
+}
+
+.auth-form {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-form.active {
+    display: flex;
+}
+
+.auth-form input {
+    padding: 12px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.auth-form input::placeholder {
+    color: #444;
+}
+
+.auth-form button {
+    padding: 12px;
+    background: #fff;
+    border: none;
+    border-radius: 2px;
+    color: #000;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.auth-form button:hover {
+    background: #ccc;
+}
+
+.error {
+    color: #888;
+    font-size: 12px;
+    display: none;
+}
+
+.error.show {
+    display: block;
+}
+
+/* Main Menu (after login) */
+#main-menu {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+#main-menu.active {
+    display: flex;
+}
+
+#landing.hidden,
+#main-menu.hidden {
+    display: none;
+}
+
+#main-menu h1 {
+    font-size: 48px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+#main-menu .welcome {
+    color: #444;
+    margin-bottom: 60px;
+    font-size: 14px;
+}
+
+#main-menu .welcome strong {
+    color: #666;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 280px;
+}
+
+.menu-btn {
+    padding: 16px 32px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.menu-btn:hover {
+    background: #1a1a1a;
+    border-color: #444;
+}
+
+.menu-btn:disabled {
+    color: #333;
+    cursor: not-allowed;
+}
+
+.menu-btn:disabled:hover {
+    background: #111;
+    border-color: #333;
+}
+
+.menu-btn-secondary {
+    background: none;
+    color: #555;
+    font-size: 13px;
+    padding: 12px;
+}
+
+.menu-btn-secondary:hover {
+    background: none;
+    color: #888;
+}
+
+/* Game Config Screen */
+#game-config {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+#game-config.active {
+    display: flex;
+}
+
+#game-config h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 40px;
+}
+
+.config-container {
+    background: #111;
+    padding: 30px;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #222;
+}
+
+.config-section {
+    margin-bottom: 25px;
+}
+
+.config-section:last-child {
+    margin-bottom: 0;
+}
+
+.config-label {
+    color: #666;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.config-input {
+    width: 100%;
+    padding: 12px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.config-input:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.config-input::-webkit-outer-spin-button,
+.config-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.config-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Region Multiselect */
+.region-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.region-option {
+    padding: 12px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #555;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.region-option:hover {
+    border-color: #444;
+    color: #888;
+}
+
+.region-option.selected {
+    border-color: #666;
+    color: #fff;
+    background: #1a1a1a;
+}
+
+.region-option:last-child:nth-child(odd) {
+    grid-column: span 2;
+}
+
+/* Difficulty Select */
+.difficulty-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.difficulty-option {
+    padding: 12px 8px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #555;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.difficulty-option:hover {
+    border-color: #444;
+    color: #888;
+}
+
+.difficulty-option.selected {
+    border-color: #666;
+    color: #fff;
+    background: #1a1a1a;
+}
+
+/* Config Buttons */
+.config-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.config-btn {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.config-btn-back {
+    background: none;
+    color: #555;
+}
+
+.config-btn-back:hover {
+    border-color: #444;
+    color: #888;
+}
+
+.config-btn-start {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+
+.config-btn-start:hover {
+    background: #ccc;
+    border-color: #ccc;
+}
+
+.config-btn-start:disabled {
+    background: #333;
+    border-color: #333;
+    color: #555;
+    cursor: not-allowed;
+}
+
+/* Game Screen */
+#game-screen {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#game-screen.active {
+    display: flex;
+}
+
+.game-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background: #111;
+}
+
+.game-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.company-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.capital-display {
+    font-family: 'Aptos Mono', monospace;
+    font-size: 16px;
+    color: #fff;
+    padding: 8px 16px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+.game-banner-right {
+    display: flex;
+    gap: 10px;
+}
+
+.banner-btn {
+    padding: 8px 16px;
+    background: none;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #555;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.banner-btn:hover {
+    border-color: #555;
+    color: #888;
+}
+
+/* Map Container */
+.map-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.na-map {
+    display: grid;
+    grid-template-columns: repeat(7, 80px);
+    grid-template-rows: repeat(5, 60px);
+    gap: 4px;
+}
+
+.map-tile {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.map-tile:hover {
+    background: #222;
+    border-color: #444;
+    color: #888;
+}
+
+.map-tile.empty {
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
+}
+
+.map-tile.empty:hover {
+    background: transparent;
+    border-color: transparent;
+}
+
+.map-tile[data-name]:hover::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    border: 1px solid #444;
+    padding: 6px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    color: #fff;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.metro-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.metro-content.dragging {
+    cursor: grabbing;
+}
+
+.metro-content.selecting {
+    cursor: crosshair;
+}
+
+.map-viewport {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.map-world {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+}
+
+.land-grid {
+    background: #0a0a0a;
+    display: grid;
+    gap: 1px;
+    user-select: none;
+}
+
+.land-tile {
+    width: 28px;
+    height: 28px;
+    background: #131313;
+    border: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    color: #222;
+    transition: background 0.05s;
+}
+
+.land-tile.water {
+    background: #0a0a0f;
+    border-color: #0f0f15;
+}
+
+.land-tile.available {
+    background: #1a1a1a;
+    border-color: #282828;
+    color: #333;
+}
+
+.land-tile.available:hover {
+    background: #222;
+    border-color: #383838;
+}
+
+.land-tile.available.selecting {
+    background: #2d2d2d;
+    border-color: #505050;
+}
+
+.land-tile.owned {
+    background: #252525;
+    border-color: #444;
+}
+
+.land-tile.unavailable {
+    background: #161616;
+    border-color: #202020;
+    color: #282828;
+}
+
+/* Region Labels */
+.region-labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.region-label {
+    position: absolute;
+    color: #3a3a3a;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.region-label.major {
+    font-size: 14px;
+    color: #444;
+}
+
+/* Map Controls */
+.map-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.map-control-btn {
+    width: 36px;
+    height: 36px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #666;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-control-btn:hover {
+    background: #222;
+    border-color: #444;
+    color: #888;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.mode-btn {
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    color: #555;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    border-right: 1px solid #333;
+}
+
+.mode-btn:last-child {
+    border-right: none;
+}
+
+.mode-btn.active {
+    background: #252525;
+    color: #fff;
+}
+
+.mode-btn:hover:not(.active) {
+    color: #888;
+}
+
+/* Selection Info */
+.selection-info {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    border: 1px solid #444;
+    padding: 12px 24px;
+    border-radius: 4px;
+    display: none;
+    align-items: center;
+    gap: 20px;
+    z-index: 100;
+}
+
+.selection-info.active {
+    display: flex;
+}
+
+.selection-info span {
+    color: #888;
+    font-size: 13px;
+}
+
+.selection-info strong {
+    color: #fff;
+}
+
+.selection-info button {
+    padding: 8px 16px;
+    background: #fff;
+    border: none;
+    border-radius: 2px;
+    color: #000;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.selection-info button:hover {
+    background: #ccc;
+}
+
+.selection-info button:disabled {
+    background: #333;
+    color: #555;
+    cursor: not-allowed;
+}
+
+.selection-info .cancel-btn {
+    background: none;
+    border: 1px solid #444;
+    color: #666;
+}
+
+.selection-info .cancel-btn:hover {
+    border-color: #666;
+    color: #888;
+}
+
+/* Coordinates display */
+.coords-display {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 8px 12px;
+    border-radius: 2px;
+    font-size: 11px;
+    color: #555;
+    font-family: 'Aptos Mono', monospace;
+}
+
+/* Game Layout with Sidebar */
+.game-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.game-sidebar {
+    width: 200px;
+    background: #111;
+    border-right: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    padding: 15px 0;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-btn {
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    color: #555;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+}
+
+.sidebar-btn:hover {
+    color: #888;
+    background: #1a1a1a;
+}
+
+.sidebar-btn.active {
+    color: #fff;
+    background: #1a1a1a;
+    border-left-color: #fff;
+}
+
+.game-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Tab Panels */
+.tab-panel {
+    display: none;
+    flex: 1;
+    position: relative;
+}
+
+.tab-panel.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* View Panels (within Home tab) */
+.view-panel {
+    display: none;
+    flex: 1;
+    position: relative;
+}
+
+.view-panel.active {
+    display: flex;
+}
+
+/* Back to map button */
+.back-to-map-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 16px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #666;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+}
+
+.back-to-map-btn:hover {
+    background: #222;
+    border-color: #444;
+    color: #888;
+}
+
+/* Empty State */
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.empty-state h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+.empty-state p {
+    font-size: 14px;
+}
+
+/* Research Tree */
+.research-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #222;
+    background: #0d0d0d;
+}
+
+.research-points-label {
+    color: #666;
+    font-size: 14px;
+}
+
+.research-points-label strong {
+    color: #fff;
+    font-size: 18px;
+    margin-left: 5px;
+}
+
+.research-tree {
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.research-branch {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.branch-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.branch-subs {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.research-sub {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 3px;
+    padding: 15px;
+}
+
+.sub-header {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.sub-levels {
+    display: flex;
+    gap: 8px;
+}
+
+.research-level {
+    flex: 1;
+    background: #151515;
+    border: 1px solid #252525;
+    border-radius: 3px;
+    padding: 10px;
+    text-align: center;
+    transition: all 0.15s;
+}
+
+.research-level.unlocked {
+    background: #1a1a1a;
+    border-color: #333;
+}
+
+.research-level.unlocked .level-num {
+    color: #555;
+}
+
+.research-level.unlocked .level-name {
+    color: #777;
+}
+
+.research-level.unlocked .level-cost {
+    color: #444;
+}
+
+.research-level.available {
+    border-color: #444;
+    cursor: pointer;
+}
+
+.research-level.available:hover {
+    background: #202020;
+    border-color: #666;
+}
+
+.research-level.available .level-num {
+    color: #888;
+}
+
+.research-level.available .level-name {
+    color: #fff;
+}
+
+.research-level.available .level-cost {
+    color: #888;
+}
+
+.research-level.next {
+    border-color: #333;
+}
+
+.research-level.next .level-num {
+    color: #444;
+}
+
+.research-level.next .level-name {
+    color: #555;
+}
+
+.research-level.next .level-cost {
+    color: #444;
+}
+
+.research-level.locked {
+    opacity: 0.35;
+}
+
+.level-num {
+    font-size: 10px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.level-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.level-cost {
+    font-size: 10px;
+    color: #333;
+}
+
+/* Load Game Screen */
+#load-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+#load-screen.active {
+    display: flex;
+}
+
+#load-screen h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 40px;
+}
+
+.load-container {
+    background: #111;
+    padding: 30px;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #222;
+}
+
+.saves-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.save-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-item:hover {
+    border-color: #444;
+    background: #151515;
+}
+
+.save-info {
+    flex: 1;
+}
+
+.save-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.save-details {
+    font-size: 12px;
+    color: #555;
+}
+
+.save-capital {
+    font-size: 14px;
+    color: #888;
+    font-family: 'Aptos Mono', monospace;
+}
+
+.save-delete {
+    padding: 8px 12px;
+    background: none;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #555;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-delete:hover {
+    border-color: #666;
+    color: #888;
+}
+
+.no-saves {
+    text-align: center;
+    padding: 40px 20px;
+    color: #444;
+}
+
+.load-back-btn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: none;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #555;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.load-back-btn:hover {
+    border-color: #444;
+    color: #888;
+}
