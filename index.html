@@ -228,7 +228,7 @@
                             <div class="campus-header">
                                 <button class="back-btn" id="campus-back-btn">← Back</button>
                                 <h2 class="campus-title" id="campus-title">Campus Name</h2>
-                                <div class="campus-stats" id="campus-stats">
+                                <div class="campus-stats">
                                     <span class="stat"><strong id="campus-tiles">0</strong> tiles</span>
                                     <span class="stat"><strong id="campus-dcs">0</strong> DCs</span>
                                     <span class="stat"><strong id="campus-mw">0</strong> MW</span>
@@ -236,39 +236,71 @@
                             </div>
                             <div class="campus-body">
                                 <div class="campus-grid-container">
-                                    <div class="campus-grid" id="campus-grid">
-                                        <!-- Grid cells will be rendered here -->
+                                    <div class="campus-grid" id="campus-grid"></div>
+                                    <!-- Inline placement confirmation -->
+                                    <div class="placement-confirm" id="placement-confirm">
+                                        <div class="placement-confirm-content">
+                                            <input type="text" id="dc-name" placeholder="DC name...">
+                                            <span class="placement-cost" id="placement-cost">$0</span>
+                                            <button class="btn-small btn-primary" id="confirm-place">Build</button>
+                                            <button class="btn-small btn-secondary" id="cancel-place">Cancel</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="campus-sidebar">
-                                    <div class="campus-dcs-list">
-                                        <h3>Datacenters</h3>
-                                        <div id="campus-dc-list">
-                                            <div class="no-dcs">No DCs built yet</div>
+                                    <div class="sidebar-section">
+                                        <h3>Your Designs</h3>
+                                        <div class="design-picker" id="dc-design-picker">
+                                            <div class="empty-designs">No DC designs yet. <a href="#" id="goto-design-tab">Create one</a></div>
                                         </div>
-                                        <button class="btn-primary" id="build-dc-btn">+ Build Datacenter</button>
+                                    </div>
+                                    <div class="sidebar-section">
+                                        <h3>Built DCs</h3>
+                                        <div class="built-list" id="campus-dc-list">
+                                            <div class="empty-list">No DCs built yet</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Build DC Modal -->
-                            <div class="campus-modal" id="build-dc-modal">
-                                <div class="modal-content">
-                                    <h3>Build Datacenter</h3>
-                                    <div class="form-group">
-                                        <label for="dc-name">Datacenter Name</label>
-                                        <input type="text" id="dc-name" placeholder="e.g., DC-1">
+                    <!-- DC View (for placing racks) -->
+                    <div class="view-panel" id="view-dc">
+                        <div class="dc-content">
+                            <div class="dc-header">
+                                <button class="back-btn" id="dc-back-btn">← Back</button>
+                                <h2 class="dc-title" id="dc-title">DC Name</h2>
+                                <div class="dc-stats">
+                                    <span class="stat"><strong id="dc-racks-used">0</strong>/<span id="dc-racks-total">0</span> racks</span>
+                                    <span class="stat"><strong id="dc-mw-used">0</strong>/<span id="dc-mw-total">0</span> MW</span>
+                                </div>
+                            </div>
+                            <div class="dc-body">
+                                <div class="dc-grid-container">
+                                    <div class="dc-grid" id="dc-grid"></div>
+                                    <!-- Inline rack placement confirmation -->
+                                    <div class="placement-confirm" id="rack-placement-confirm">
+                                        <div class="placement-confirm-content">
+                                            <span class="placement-label" id="rack-placement-label">x1</span>
+                                            <span class="placement-cost" id="rack-placement-cost">$0</span>
+                                            <button class="btn-small btn-primary" id="confirm-rack-place">Install</button>
+                                            <button class="btn-small btn-secondary" id="cancel-rack-place">Cancel</button>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="dc-design">DC Design</label>
-                                        <select id="dc-design"></select>
+                                </div>
+                                <div class="dc-sidebar">
+                                    <div class="sidebar-section">
+                                        <h3>Rack Designs</h3>
+                                        <div class="design-picker" id="rack-design-picker">
+                                            <div class="empty-designs">No rack designs yet. <a href="#" id="goto-design-tab-2">Create one</a></div>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <p class="help-text">Click on the grid to place the datacenter</p>
-                                    </div>
-                                    <div class="modal-actions">
-                                        <button class="btn-secondary" id="cancel-build-dc">Cancel</button>
-                                        <button class="btn-primary" id="confirm-build-dc" disabled>Build</button>
+                                    <div class="sidebar-section">
+                                        <h3>Installed Racks</h3>
+                                        <div class="built-list" id="dc-rack-list">
+                                            <div class="empty-list">No racks installed yet</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -457,7 +489,6 @@
                             <div class="design-column">
                                 <div class="design-column-header">
                                     <div class="column-title">
-                                        <span class="column-icon">🏢</span>
                                         <h3>DC Infrastructure</h3>
                                     </div>
                                     <button class="design-add-btn" id="new-spcn-btn">+</button>
@@ -472,7 +503,6 @@
                             <div class="design-column">
                                 <div class="design-column-header">
                                     <div class="column-title">
-                                        <span class="column-icon">🗄️</span>
                                         <h3>Rack Configurations</h3>
                                     </div>
                                     <button class="design-add-btn" id="new-rack-btn">+</button>
@@ -486,46 +516,53 @@
 
                         <!-- SPCN Form Modal -->
                         <div class="design-modal" id="spcn-form-container">
-                            <div class="design-modal-content">
+                            <div class="design-modal-content design-modal-wide">
                                 <form class="design-form" id="spcn-form">
                                     <div class="modal-header">
                                         <h3>New DC Design</h3>
                                         <button type="button" class="modal-close" id="spcn-cancel">&times;</button>
                                     </div>
-                                    <div class="form-row">
-                                        <div class="form-group full">
-                                            <label for="spcn-name">Design Name</label>
-                                            <input type="text" id="spcn-name" placeholder="e.g., Gen3-Liquid" required>
+                                    <div class="modal-body-split">
+                                        <div class="modal-form-side">
+                                            <div class="form-row">
+                                                <div class="form-group full">
+                                                    <label for="spcn-name">Design Name</label>
+                                                    <input type="text" id="spcn-name" placeholder="e.g., Gen3-Liquid" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="spcn-size">Footprint</label>
+                                                    <select id="spcn-size" required></select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="spcn-power">Power Density</label>
+                                                    <select id="spcn-power" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="spcn-cooling">Cooling</label>
+                                                    <select id="spcn-cooling" required></select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="spcn-network">Network</label>
+                                                    <select id="spcn-network" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group full">
+                                                    <label for="spcn-redundancy">Power Redundancy</label>
+                                                    <select id="spcn-redundancy" required></select>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="spcn-size">Footprint</label>
-                                            <select id="spcn-size" required></select>
+                                        <div class="modal-calc-side">
+                                            <div class="calc-side-header">Specifications</div>
+                                            <div class="form-calc" id="spcn-calc">
+                                                <div class="calc-placeholder">Select all options to see calculations</div>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="spcn-power">Power Density</label>
-                                            <select id="spcn-power" required></select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="spcn-cooling">Cooling</label>
-                                            <select id="spcn-cooling" required></select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="spcn-network">Network</label>
-                                            <select id="spcn-network" required></select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group full">
-                                            <label for="spcn-redundancy">Power Redundancy</label>
-                                            <select id="spcn-redundancy" required></select>
-                                        </div>
-                                    </div>
-                                    <div class="form-calc" id="spcn-calc">
-                                        <div class="calc-placeholder">Select all options to see calculations</div>
                                     </div>
                                     <div class="form-actions">
                                         <button type="button" class="btn-secondary" id="spcn-cancel-2">Cancel</button>

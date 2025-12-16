@@ -1,32 +1,77 @@
 // Design System - SPCN (DC Infrastructure) and Rack Configurations
-import { Research } from './research';
+import { Research, ResearchTree } from './research';
+
+// ============================================
+// Regional Electricity System
+// ============================================
+
+export interface RegionalPower {
+  id: string;
+  name: string;
+  baseRate: number;        // $/kWh base rate
+  totalCapacityMW: number; // Total MW available in region
+  usedCapacityMW: number;  // MW currently in use
+}
+
+// Regional power data - rates and capacity
+export const RegionalPowerData: { [key: string]: RegionalPower } = {
+  nova: { id: 'nova', name: 'Northern Virginia', baseRate: 0.065, totalCapacityMW: 5000, usedCapacityMW: 0 },
+  dallas: { id: 'dallas', name: 'Dallas', baseRate: 0.055, totalCapacityMW: 3000, usedCapacityMW: 0 },
+  chicago: { id: 'chicago', name: 'Chicago', baseRate: 0.070, totalCapacityMW: 2500, usedCapacityMW: 0 },
+  phoenix: { id: 'phoenix', name: 'Phoenix', baseRate: 0.058, totalCapacityMW: 2000, usedCapacityMW: 0 },
+  seattle: { id: 'seattle', name: 'Seattle', baseRate: 0.048, totalCapacityMW: 1500, usedCapacityMW: 0 },
+  atlanta: { id: 'atlanta', name: 'Atlanta', baseRate: 0.062, totalCapacityMW: 1800, usedCapacityMW: 0 },
+};
+
+// Calculate effective electricity rate based on supply/demand
+export function getEffectiveRate(regionId: string): number {
+  const region = RegionalPowerData[regionId];
+  if (!region) return 0.06; // Default rate
+
+  const utilization = region.usedCapacityMW / region.totalCapacityMW;
+  // Rate increases as utilization goes up (supply/demand)
+  // At 0% utilization: base rate
+  // At 50% utilization: 1.1x base rate
+  // At 80% utilization: 1.4x base rate
+  // At 100% utilization: 2x base rate
+  const demandMultiplier = 1 + (utilization * utilization);
+  return region.baseRate * demandMultiplier;
+}
 
 // ============================================
 // SPCN Design Options (gated by research)
 // ============================================
 
+// Cooling options with cost multipliers
+// costPerKW = cost to install cooling infrastructure per kW of IT load
+// Real-world: $500-2,000/kW depending on technology
 export const CoolingOptions = [
-  { id: 'air', name: 'Air (CRAC)', pue: 1.8, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 1 } },
-  { id: 'hotcold', name: 'Hot/Cold Aisle', pue: 1.5, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 2 } },
-  { id: 'liquid', name: 'Rear-Door Liquid', pue: 1.3, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 3 } },
-  { id: 'direct', name: 'Direct-to-Chip', pue: 1.15, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 4 } },
-  { id: 'immersion', name: 'Immersion', pue: 1.05, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 5 } },
+  { id: 'air', name: 'Air (CRAC)', pue: 1.8, costPerKW: 500, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 1 } },
+  { id: 'hotcold', name: 'Hot/Cold Aisle', pue: 1.5, costPerKW: 700, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 2 } },
+  { id: 'liquid', name: 'Rear-Door Liquid', pue: 1.3, costPerKW: 1000, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 3 } },
+  { id: 'direct', name: 'Direct-to-Chip', pue: 1.15, costPerKW: 1500, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 4 } },
+  { id: 'immersion', name: 'Immersion', pue: 1.05, costPerKW: 2200, researchRequired: { branch: 'infrastructure', sub: 'cooling', level: 5 } },
 ];
 
+// Power density options with infrastructure cost per kW
+// Real-world: $800-1,500/kW for UPS, switchgear, PDUs
+// Higher density requires more robust infrastructure
 export const PowerDensityOptions = [
-  { id: '5kw', name: '5 kW/rack', kw: 5, researchRequired: { branch: 'infrastructure', sub: 'power', level: 1 } },
-  { id: '10kw', name: '10 kW/rack', kw: 10, researchRequired: { branch: 'infrastructure', sub: 'power', level: 2 } },
-  { id: '20kw', name: '20 kW/rack', kw: 20, researchRequired: { branch: 'infrastructure', sub: 'power', level: 3 } },
-  { id: '50kw', name: '50 kW/rack', kw: 50, researchRequired: { branch: 'infrastructure', sub: 'power', level: 4 } },
-  { id: '100kw', name: '100 kW/rack', kw: 100, researchRequired: { branch: 'infrastructure', sub: 'power', level: 5 } },
+  { id: '5kw', name: '5 kW/rack', kw: 5, costPerKW: 800, researchRequired: { branch: 'infrastructure', sub: 'power', level: 1 } },
+  { id: '10kw', name: '10 kW/rack', kw: 10, costPerKW: 1000, researchRequired: { branch: 'infrastructure', sub: 'power', level: 2 } },
+  { id: '20kw', name: '20 kW/rack', kw: 20, costPerKW: 1200, researchRequired: { branch: 'infrastructure', sub: 'power', level: 3 } },
+  { id: '50kw', name: '50 kW/rack', kw: 50, costPerKW: 1400, researchRequired: { branch: 'infrastructure', sub: 'power', level: 4 } },
+  { id: '100kw', name: '100 kW/rack', kw: 100, costPerKW: 1600, researchRequired: { branch: 'infrastructure', sub: 'power', level: 5 } },
 ];
 
+// Network options with cost per rack
+// Real-world: $2-10K/rack depending on speed/density
 export const NetworkOptions = [
-  { id: '10g', name: '10 GbE', speed: 10, researchRequired: { branch: 'infrastructure', sub: 'network', level: 1 } },
-  { id: '25g', name: '25 GbE', speed: 25, researchRequired: { branch: 'infrastructure', sub: 'network', level: 2 } },
-  { id: '100g', name: '100 GbE', speed: 100, researchRequired: { branch: 'infrastructure', sub: 'network', level: 3 } },
-  { id: '400g', name: '400 GbE', speed: 400, researchRequired: { branch: 'infrastructure', sub: 'network', level: 4 } },
-  { id: 'fabric', name: 'AI Fabric', speed: 800, researchRequired: { branch: 'infrastructure', sub: 'network', level: 5 } },
+  { id: '10g', name: '10 GbE', speed: 10, costPerRack: 2000, researchRequired: { branch: 'infrastructure', sub: 'network', level: 1 } },
+  { id: '25g', name: '25 GbE', speed: 25, costPerRack: 3500, researchRequired: { branch: 'infrastructure', sub: 'network', level: 2 } },
+  { id: '100g', name: '100 GbE', speed: 100, costPerRack: 5500, researchRequired: { branch: 'infrastructure', sub: 'network', level: 3 } },
+  { id: '400g', name: '400 GbE', speed: 400, costPerRack: 8000, researchRequired: { branch: 'infrastructure', sub: 'network', level: 4 } },
+  { id: 'fabric', name: 'AI Fabric', speed: 800, costPerRack: 12000, researchRequired: { branch: 'infrastructure', sub: 'network', level: 5 } },
 ];
 
 // Power redundancy - not research gated, just affects cost and reliability
@@ -47,6 +92,8 @@ export const DCSizeOptions = [
 
 // ============================================
 // Rack Type Options (gated by research)
+// costPerNode = hardware CapEx per node
+// maintenancePct = annual maintenance as % of hardware cost (typically 10-15%)
 // ============================================
 
 export const RackTypeOptions = [
@@ -54,44 +101,44 @@ export const RackTypeOptions = [
     id: 'storage',
     name: 'Storage',
     tiers: [
-      { id: 'hdd', name: 'HDD Arrays', kwPerNode: 0.15, revenuePerNode: 100, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 1 } },
-      { id: 'hybrid', name: 'Hybrid Storage', kwPerNode: 0.2, revenuePerNode: 175, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 2 } },
-      { id: 'ssd', name: 'SSD Arrays', kwPerNode: 0.25, revenuePerNode: 300, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 3 } },
-      { id: 'nvme', name: 'NVMe Flash', kwPerNode: 0.3, revenuePerNode: 500, minNodes: 8, maxNodes: 36, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 4 } },
-      { id: 'scm', name: 'SCM/Optane', kwPerNode: 0.35, revenuePerNode: 750, minNodes: 8, maxNodes: 36, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 5 } },
+      { id: 'hdd', name: 'HDD Arrays', kwPerNode: 0.15, revenuePerNode: 100, costPerNode: 800, maintenancePct: 0.12, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 1 } },
+      { id: 'hybrid', name: 'Hybrid Storage', kwPerNode: 0.2, revenuePerNode: 175, costPerNode: 1500, maintenancePct: 0.12, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 2 } },
+      { id: 'ssd', name: 'SSD Arrays', kwPerNode: 0.25, revenuePerNode: 300, costPerNode: 3000, maintenancePct: 0.10, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 3 } },
+      { id: 'nvme', name: 'NVMe Flash', kwPerNode: 0.3, revenuePerNode: 500, costPerNode: 6000, maintenancePct: 0.10, minNodes: 8, maxNodes: 36, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 4 } },
+      { id: 'scm', name: 'SCM/Optane', kwPerNode: 0.35, revenuePerNode: 750, costPerNode: 12000, maintenancePct: 0.10, minNodes: 8, maxNodes: 36, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'storage', level: 5 } },
     ]
   },
   {
     id: 'compute',
     name: 'Compute',
     tiers: [
-      { id: 'basic', name: 'Basic Servers', kwPerNode: 0.3, revenuePerNode: 150, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'compute', level: 1 } },
-      { id: 'midrange', name: 'Mid-Range', kwPerNode: 0.5, revenuePerNode: 250, minNodes: 10, maxNodes: 42, defaultNodes: 16, researchRequired: { branch: 'hardware', sub: 'compute', level: 2 } },
-      { id: 'highcore', name: 'High-Core', kwPerNode: 0.8, revenuePerNode: 400, minNodes: 8, maxNodes: 32, defaultNodes: 15, researchRequired: { branch: 'hardware', sub: 'compute', level: 3 } },
-      { id: 'multisocket', name: 'Multi-Socket', kwPerNode: 1.2, revenuePerNode: 600, minNodes: 6, maxNodes: 20, defaultNodes: 15, researchRequired: { branch: 'hardware', sub: 'compute', level: 4 } },
-      { id: 'custom', name: 'Custom Silicon', kwPerNode: 1.5, revenuePerNode: 1000, minNodes: 6, maxNodes: 20, defaultNodes: 16, researchRequired: { branch: 'hardware', sub: 'compute', level: 5 } },
+      { id: 'basic', name: 'Basic Servers', kwPerNode: 0.3, revenuePerNode: 150, costPerNode: 2500, maintenancePct: 0.12, minNodes: 10, maxNodes: 42, defaultNodes: 20, researchRequired: { branch: 'hardware', sub: 'compute', level: 1 } },
+      { id: 'midrange', name: 'Mid-Range', kwPerNode: 0.5, revenuePerNode: 250, costPerNode: 5000, maintenancePct: 0.12, minNodes: 10, maxNodes: 42, defaultNodes: 16, researchRequired: { branch: 'hardware', sub: 'compute', level: 2 } },
+      { id: 'highcore', name: 'High-Core', kwPerNode: 0.8, revenuePerNode: 400, costPerNode: 10000, maintenancePct: 0.10, minNodes: 8, maxNodes: 32, defaultNodes: 15, researchRequired: { branch: 'hardware', sub: 'compute', level: 3 } },
+      { id: 'multisocket', name: 'Multi-Socket', kwPerNode: 1.2, revenuePerNode: 600, costPerNode: 20000, maintenancePct: 0.10, minNodes: 6, maxNodes: 20, defaultNodes: 15, researchRequired: { branch: 'hardware', sub: 'compute', level: 4 } },
+      { id: 'custom', name: 'Custom Silicon', kwPerNode: 1.5, revenuePerNode: 1000, costPerNode: 40000, maintenancePct: 0.08, minNodes: 6, maxNodes: 20, defaultNodes: 16, researchRequired: { branch: 'hardware', sub: 'compute', level: 5 } },
     ]
   },
   {
     id: 'gpu',
     name: 'GPU',
     tiers: [
-      { id: 'entry', name: 'Entry GPU', kwPerNode: 1.5, revenuePerNode: 1000, minNodes: 4, maxNodes: 16, defaultNodes: 8, researchRequired: { branch: 'hardware', sub: 'gpu', level: 1 } },
-      { id: 'datacenter', name: 'Data Center GPU', kwPerNode: 2.5, revenuePerNode: 2250, minNodes: 4, maxNodes: 12, defaultNodes: 8, researchRequired: { branch: 'hardware', sub: 'gpu', level: 2 } },
-      { id: 'multigpu', name: 'Multi-GPU Nodes', kwPerNode: 5, revenuePerNode: 5000, minNodes: 2, maxNodes: 8, defaultNodes: 7, researchRequired: { branch: 'hardware', sub: 'gpu', level: 3 } },
-      { id: 'cluster', name: 'GPU Clusters', kwPerNode: 8, revenuePerNode: 10000, minNodes: 2, maxNodes: 8, defaultNodes: 6, researchRequired: { branch: 'hardware', sub: 'gpu', level: 4 } },
-      { id: 'supercompute', name: 'AI Supercompute', kwPerNode: 12, revenuePerNode: 20000, minNodes: 2, maxNodes: 8, defaultNodes: 6, researchRequired: { branch: 'hardware', sub: 'gpu', level: 5 } },
+      { id: 'entry', name: 'Entry GPU', kwPerNode: 1.5, revenuePerNode: 1000, costPerNode: 8000, maintenancePct: 0.12, minNodes: 4, maxNodes: 16, defaultNodes: 8, researchRequired: { branch: 'hardware', sub: 'gpu', level: 1 } },
+      { id: 'datacenter', name: 'Data Center GPU', kwPerNode: 2.5, revenuePerNode: 2250, costPerNode: 20000, maintenancePct: 0.12, minNodes: 4, maxNodes: 12, defaultNodes: 8, researchRequired: { branch: 'hardware', sub: 'gpu', level: 2 } },
+      { id: 'multigpu', name: 'Multi-GPU Nodes', kwPerNode: 5, revenuePerNode: 5000, costPerNode: 65000, maintenancePct: 0.10, minNodes: 2, maxNodes: 8, defaultNodes: 7, researchRequired: { branch: 'hardware', sub: 'gpu', level: 3 } },
+      { id: 'cluster', name: 'GPU Clusters', kwPerNode: 8, revenuePerNode: 10000, costPerNode: 180000, maintenancePct: 0.10, minNodes: 2, maxNodes: 8, defaultNodes: 6, researchRequired: { branch: 'hardware', sub: 'gpu', level: 4 } },
+      { id: 'supercompute', name: 'AI Supercompute', kwPerNode: 12, revenuePerNode: 20000, costPerNode: 350000, maintenancePct: 0.08, minNodes: 2, maxNodes: 8, defaultNodes: 6, researchRequired: { branch: 'hardware', sub: 'gpu', level: 5 } },
     ]
   },
   {
     id: 'hpc',
     name: 'HPC',
     tiers: [
-      { id: 'basic', name: 'Basic Cluster', kwPerNode: 1.0, revenuePerNode: 700, minNodes: 8, maxNodes: 20, defaultNodes: 15, researchRequired: { branch: 'hardware', sub: 'hpc', level: 1 } },
-      { id: 'infiniband', name: 'InfiniBand', kwPerNode: 1.5, revenuePerNode: 1300, minNodes: 6, maxNodes: 16, defaultNodes: 12, researchRequired: { branch: 'hardware', sub: 'hpc', level: 2 } },
-      { id: 'lowlatency', name: 'Low-Latency', kwPerNode: 2.5, revenuePerNode: 2500, minNodes: 4, maxNodes: 14, defaultNodes: 12, researchRequired: { branch: 'hardware', sub: 'hpc', level: 3 } },
-      { id: 'coupled', name: 'Tightly Coupled', kwPerNode: 4, revenuePerNode: 4500, minNodes: 4, maxNodes: 12, defaultNodes: 11, researchRequired: { branch: 'hardware', sub: 'hpc', level: 4 } },
-      { id: 'exascale', name: 'Exascale Ready', kwPerNode: 6, revenuePerNode: 8000, minNodes: 4, maxNodes: 12, defaultNodes: 11, researchRequired: { branch: 'hardware', sub: 'hpc', level: 5 } },
+      { id: 'basic', name: 'Basic Cluster', kwPerNode: 1.0, revenuePerNode: 700, costPerNode: 5000, maintenancePct: 0.12, minNodes: 8, maxNodes: 20, defaultNodes: 15, researchRequired: { branch: 'hardware', sub: 'hpc', level: 1 } },
+      { id: 'infiniband', name: 'InfiniBand', kwPerNode: 1.5, revenuePerNode: 1300, costPerNode: 12000, maintenancePct: 0.12, minNodes: 6, maxNodes: 16, defaultNodes: 12, researchRequired: { branch: 'hardware', sub: 'hpc', level: 2 } },
+      { id: 'lowlatency', name: 'Low-Latency', kwPerNode: 2.5, revenuePerNode: 2500, costPerNode: 25000, maintenancePct: 0.10, minNodes: 4, maxNodes: 14, defaultNodes: 12, researchRequired: { branch: 'hardware', sub: 'hpc', level: 3 } },
+      { id: 'coupled', name: 'Tightly Coupled', kwPerNode: 4, revenuePerNode: 4500, costPerNode: 45000, maintenancePct: 0.10, minNodes: 4, maxNodes: 12, defaultNodes: 11, researchRequired: { branch: 'hardware', sub: 'hpc', level: 4 } },
+      { id: 'exascale', name: 'Exascale Ready', kwPerNode: 6, revenuePerNode: 8000, costPerNode: 80000, maintenancePct: 0.08, minNodes: 4, maxNodes: 12, defaultNodes: 11, researchRequired: { branch: 'hardware', sub: 'hpc', level: 5 } },
     ]
   },
 ];
@@ -112,9 +159,114 @@ export interface SPCNDesign {
   tiles: number;        // Total tiles footprint
   totalMW: number;      // Total MW capacity
   totalRacks: number;   // Total rack capacity
-  buildCost: number;    // Total build cost
+  buildCost: number;    // Total build cost (CapEx)
   pue: number;
   reliability: number;
+  // CapEx breakdown
+  capexShell: number;      // Building shell cost
+  capexPower: number;      // Power infrastructure cost
+  capexCooling: number;    // Cooling infrastructure cost
+  capexNetwork: number;    // Network infrastructure cost
+  // OpEx (monthly, calculated at runtime based on region)
+  opexBase: number;        // Base monthly OpEx (maintenance + staff) before power
+  maintenancePerRack: number; // $/rack/month for maintenance
+  staffCostBase: number;   // Base staff cost before ops research multiplier
+}
+
+// ============================================
+// CapEx/OpEx Calculation Functions
+// ============================================
+
+// Shell cost per tile (building structure, foundation, site work)
+// Real-world: ~$1-2M per MW, with ~0.5-1 MW per tile depending on density
+// Using $1.5M per tile as baseline
+const SHELL_COST_PER_TILE = 1_500_000; // $1.5M per tile
+
+// Staff cost scaling
+// Real-world: ~20-40 staff for a 10MW facility at ~$80-120K/year each = $2-4M/year
+// For 16-tile facility (~10MW), monthly staff should be ~$200-350K
+// Formula: base × tiles (linear scaling with some efficiency at scale)
+const BASE_STAFF_COST_PER_TILE = 15_000; // $15K base per tile per month
+
+// Maintenance cost per rack per month (parts, repairs, consumables)
+const BASE_MAINTENANCE_PER_RACK = 75; // $75/rack/month
+
+/**
+ * Calculate complete CapEx breakdown for a DC design
+ */
+export function calculateCapEx(
+  tiles: number,
+  totalMW: number,
+  totalRacks: number,
+  cooling: typeof CoolingOptions[0],
+  power: typeof PowerDensityOptions[0],
+  network: typeof NetworkOptions[0],
+  redundancy: typeof PowerRedundancyOptions[0]
+): {
+  shell: number;
+  powerInfra: number;
+  coolingInfra: number;
+  networkInfra: number;
+  total: number;
+} {
+  // Shell: $5M per tile
+  const shell = tiles * SHELL_COST_PER_TILE;
+
+  // Power infrastructure: costPerKW × total kW × redundancy multiplier
+  const totalKW = totalMW * 1000;
+  const powerInfra = power.costPerKW * totalKW * redundancy.costMult;
+
+  // Cooling infrastructure: costPerKW × total kW (cooling scales with IT load)
+  const coolingInfra = cooling.costPerKW * totalKW;
+
+  // Network infrastructure: costPerRack × total racks
+  const networkInfra = network.costPerRack * totalRacks;
+
+  // Total CapEx
+  const total = shell + powerInfra + coolingInfra + networkInfra;
+
+  return { shell, powerInfra, coolingInfra, networkInfra, total };
+}
+
+/**
+ * Calculate monthly OpEx for a DC
+ * Note: Power cost is calculated at runtime based on actual utilization and regional rates
+ */
+export function calculateOpEx(
+  totalMW: number,
+  totalRacks: number,
+  tiles: number,
+  pue: number,
+  regionId: string
+): {
+  powerCost: number;      // Monthly power cost
+  maintenance: number;    // Monthly maintenance cost
+  staff: number;          // Monthly staff cost (before ops research multiplier)
+  total: number;          // Total monthly OpEx
+  opsMultiplier: number;  // Operations research multiplier applied
+} {
+  // Get operations research level for multiplier
+  const opsLevel = Research.getLevel('operations', 'ops');
+  const opsData = ResearchTree.operations?.subcategories?.ops?.levels?.find(l => l.level === opsLevel);
+  const opsMultiplier = opsData?.opexMult ?? 1.0;
+
+  // Power cost: MW × PUE × 720 hours × $/kWh × 1000 (convert MW to kW)
+  const effectiveRate = getEffectiveRate(regionId);
+  const powerCost = totalMW * pue * 720 * effectiveRate * 1000;
+
+  // Maintenance: $75/rack/month base
+  const maintenance = totalRacks * BASE_MAINTENANCE_PER_RACK;
+
+  // Staff cost: linear scaling with mild economies of scale at larger sizes
+  // Modified by operations research multiplier (0.5x at max level = lights-out ops)
+  const scaleFactor = 1 - (Math.log10(tiles + 1) * 0.1); // ~0.9x at 16 tiles, ~0.85x at 64 tiles
+  const staffBase = BASE_STAFF_COST_PER_TILE * tiles * Math.max(0.7, scaleFactor);
+  const staff = staffBase * opsMultiplier;
+
+  // Total OpEx
+  const total = powerCost + maintenance + staff;
+
+  return { powerCost, maintenance, staff, total, opsMultiplier };
 }
 
 export interface RackDesign {
@@ -125,7 +277,25 @@ export interface RackDesign {
   nodeCount: number;    // Number of nodes in the rack
   // Calculated fields
   kwPerRack: number;
-  revenuePerRack: number;
+  revenuePerRack: number;   // Monthly revenue potential
+  // CapEx (hardware cost)
+  capexPerRack: number;     // Hardware cost per rack
+  // OpEx (monthly, per rack)
+  opexPower: number;        // Power cost per rack (depends on region/PUE at runtime)
+  opexMaintenance: number;  // Maintenance/support cost per rack per month
+}
+
+/**
+ * Calculate rack OpEx (power cost depends on region and DC PUE)
+ */
+export function calculateRackOpEx(
+  kwPerRack: number,
+  pue: number,
+  regionId: string
+): number {
+  const effectiveRate = getEffectiveRate(regionId);
+  // kW × PUE × 720 hours × $/kWh
+  return kwPerRack * pue * 720 * effectiveRate;
 }
 
 // ============================================
@@ -135,6 +305,7 @@ export interface RackDesign {
 export const Designs = {
   spcnDesigns: [] as SPCNDesign[],
   rackDesigns: [] as RackDesign[],
+  initialized: false,
 
   // DOM elements
   container: null as HTMLElement | null,
@@ -146,7 +317,11 @@ export const Designs = {
     this.spcnList = document.getElementById('spcn-design-list');
     this.rackList = document.getElementById('rack-design-list');
 
-    this.bindEvents();
+    // Only bind events once to prevent duplicate handlers
+    if (!this.initialized) {
+      this.bindEvents();
+      this.initialized = true;
+    }
     this.render();
   },
 
@@ -326,12 +501,11 @@ export const Designs = {
     const totalRacks = size.tiles * size.racksPerTile;
     const totalMW = (power.kw * totalRacks) / 1000;
 
-    // Build cost: base $20M per tile, scales with options
-    const baseCostPerTile = 20_000_000;
-    const coolingMult = 1 + (CoolingOptions.indexOf(cooling) * 0.15);
-    const powerMult = 1 + (PowerDensityOptions.indexOf(power) * 0.2);
-    const buildCostPerTile = baseCostPerTile * coolingMult * powerMult * redundancy.costMult;
-    const totalBuildCost = buildCostPerTile * size.tiles;
+    // Calculate CapEx using new formula
+    const capex = calculateCapEx(size.tiles, totalMW, totalRacks, cooling, power, network, redundancy);
+
+    // Calculate OpEx (using nova as default region for preview)
+    const opex = calculateOpEx(totalMW, totalRacks, size.tiles, cooling.pue, 'nova');
 
     // Convert reliability to SLA
     const sla = redundancy.reliability >= 95 ? '99.999%' :
@@ -339,30 +513,81 @@ export const Designs = {
                 redundancy.reliability >= 70 ? '99.95%' :
                 redundancy.reliability >= 50 ? '99.9%' : '99.5%';
 
+    // Format currency helper
+    const fmt = (n: number) => {
+      if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+      if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+      if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+      return `$${n.toFixed(0)}`;
+    };
+
     calcEl.innerHTML = `
-      <div class="calc-row">
-        <span class="calc-label">Footprint</span>
-        <span class="calc-value">${size.tiles} tiles</span>
+      <div class="calc-section">
+        <div class="calc-section-header">Capacity</div>
+        <div class="calc-row">
+          <span class="calc-label">Footprint</span>
+          <span class="calc-value">${size.tiles} tiles</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Power Capacity</span>
+          <span class="calc-value">${totalMW.toFixed(1)} MW</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Rack Capacity</span>
+          <span class="calc-value">${totalRacks.toLocaleString()} racks</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">PUE</span>
+          <span class="calc-value">${cooling.pue.toFixed(2)}</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">SLA</span>
+          <span class="calc-value">${sla}</span>
+        </div>
       </div>
-      <div class="calc-row">
-        <span class="calc-label">Total Capacity</span>
-        <span class="calc-value">${totalMW.toFixed(1)} MW</span>
+
+      <div class="calc-section">
+        <div class="calc-section-header">CapEx (Build Cost)</div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Shell</span>
+          <span class="calc-value">${fmt(capex.shell)}</span>
+        </div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Power Infra</span>
+          <span class="calc-value">${fmt(capex.powerInfra)}</span>
+        </div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Cooling Infra</span>
+          <span class="calc-value">${fmt(capex.coolingInfra)}</span>
+        </div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Network Infra</span>
+          <span class="calc-value">${fmt(capex.networkInfra)}</span>
+        </div>
+        <div class="calc-row calc-total">
+          <span class="calc-label">Total CapEx</span>
+          <span class="calc-value">${fmt(capex.total)}</span>
+        </div>
       </div>
-      <div class="calc-row">
-        <span class="calc-label">Rack Capacity</span>
-        <span class="calc-value">${totalRacks.toLocaleString()} racks</span>
-      </div>
-      <div class="calc-row">
-        <span class="calc-label">Build Cost</span>
-        <span class="calc-value">$${(totalBuildCost / 1_000_000).toFixed(0)}M</span>
-      </div>
-      <div class="calc-row">
-        <span class="calc-label">PUE</span>
-        <span class="calc-value">${cooling.pue.toFixed(2)}</span>
-      </div>
-      <div class="calc-row">
-        <span class="calc-label">SLA</span>
-        <span class="calc-value">${sla}</span>
+
+      <div class="calc-section">
+        <div class="calc-section-header">OpEx (Monthly, NoVA rates)</div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Power Cost</span>
+          <span class="calc-value">${fmt(opex.powerCost)}/mo</span>
+        </div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Maintenance</span>
+          <span class="calc-value">${fmt(opex.maintenance)}/mo</span>
+        </div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Staff${opex.opsMultiplier < 1 ? ` (×${opex.opsMultiplier.toFixed(1)})` : ''}</span>
+          <span class="calc-value">${fmt(opex.staff)}/mo</span>
+        </div>
+        <div class="calc-row calc-total">
+          <span class="calc-label">Total OpEx</span>
+          <span class="calc-value">${fmt(opex.total)}/mo</span>
+        </div>
       </div>
     `;
   },
@@ -391,18 +616,73 @@ export const Designs = {
     const totalKw = selectedTier.kwPerNode * nodeCount;
     const totalRevenue = selectedTier.revenuePerNode * nodeCount;
 
+    // CapEx: hardware cost
+    const capex = selectedTier.costPerNode * nodeCount;
+
+    // OpEx: power (assuming PUE 1.5, NoVA rates for preview) + maintenance
+    const pue = 1.5; // Assume mid-range PUE for preview
+    const powerCost = calculateRackOpEx(totalKw, pue, 'nova');
+    const maintenanceCost = (capex * selectedTier.maintenancePct) / 12; // Annual to monthly
+    const totalOpex = powerCost + maintenanceCost;
+
+    // Margin calculation
+    const margin = totalRevenue - totalOpex;
+    const marginPct = totalRevenue > 0 ? (margin / totalRevenue) * 100 : 0;
+
+    // Format currency helper
+    const fmt = (n: number) => {
+      if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+      if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+      return `$${n.toFixed(0)}`;
+    };
+
     calcEl.innerHTML = `
-      <div class="calc-row">
-        <span class="calc-label">Nodes</span>
-        <span class="calc-value">${nodeCount} nodes</span>
+      <div class="calc-section">
+        <div class="calc-section-header">Specs</div>
+        <div class="calc-row">
+          <span class="calc-label">Nodes</span>
+          <span class="calc-value">${nodeCount} nodes</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Power Draw</span>
+          <span class="calc-value">${totalKw.toFixed(1)} kW/rack</span>
+        </div>
       </div>
-      <div class="calc-row">
-        <span class="calc-label">Power Draw</span>
-        <span class="calc-value">${totalKw.toFixed(1)} kW/rack</span>
+
+      <div class="calc-section">
+        <div class="calc-section-header">CapEx (per rack)</div>
+        <div class="calc-row calc-total">
+          <span class="calc-label">Hardware Cost</span>
+          <span class="calc-value">${fmt(capex)}</span>
+        </div>
       </div>
-      <div class="calc-row">
-        <span class="calc-label">Revenue Potential</span>
-        <span class="calc-value">$${totalRevenue.toLocaleString()}/mo</span>
+
+      <div class="calc-section">
+        <div class="calc-section-header">OpEx (Monthly, per rack)</div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Power (PUE 1.5)</span>
+          <span class="calc-value">${fmt(powerCost)}/mo</span>
+        </div>
+        <div class="calc-row calc-sub">
+          <span class="calc-label">Maintenance</span>
+          <span class="calc-value">${fmt(maintenanceCost)}/mo</span>
+        </div>
+        <div class="calc-row calc-total">
+          <span class="calc-label">Total OpEx</span>
+          <span class="calc-value">${fmt(totalOpex)}/mo</span>
+        </div>
+      </div>
+
+      <div class="calc-section">
+        <div class="calc-section-header">Revenue (per rack)</div>
+        <div class="calc-row">
+          <span class="calc-label">Gross Revenue</span>
+          <span class="calc-value">${fmt(totalRevenue)}/mo</span>
+        </div>
+        <div class="calc-row calc-total">
+          <span class="calc-label">Margin</span>
+          <span class="calc-value" style="color: ${margin >= 0 ? '#4CAF50' : '#f44336'}">${fmt(margin)}/mo (${marginPct.toFixed(0)}%)</span>
+        </div>
       </div>
     `;
   },
@@ -441,6 +721,7 @@ export const Designs = {
 
     const coolingOpt = CoolingOptions.find(c => c.id === cooling)!;
     const powerOpt = PowerDensityOptions.find(p => p.id === power)!;
+    const networkOpt = NetworkOptions.find(n => n.id === network)!;
     const redundancyOpt = PowerRedundancyOptions.find(r => r.id === redundancy)!;
     const sizeOpt = DCSizeOptions.find(s => s.id === sizeId)!;
 
@@ -448,11 +729,14 @@ export const Designs = {
     const totalRacks = sizeOpt.tiles * sizeOpt.racksPerTile;
     const totalMW = (powerOpt.kw * totalRacks) / 1000;
 
-    const baseCostPerTile = 20_000_000;
-    const coolingMult = 1 + (CoolingOptions.indexOf(coolingOpt) * 0.15);
-    const powerMult = 1 + (PowerDensityOptions.indexOf(powerOpt) * 0.2);
-    const buildCostPerTile = baseCostPerTile * coolingMult * powerMult * redundancyOpt.costMult;
-    const totalBuildCost = buildCostPerTile * sizeOpt.tiles;
+    // Calculate CapEx using new formula
+    const capex = calculateCapEx(sizeOpt.tiles, totalMW, totalRacks, coolingOpt, powerOpt, networkOpt, redundancyOpt);
+
+    // Calculate base OpEx (without power, as that depends on region)
+    const maintenancePerRack = BASE_MAINTENANCE_PER_RACK;
+    const scaleFactor = 1 - (Math.log10(sizeOpt.tiles + 1) * 0.1);
+    const staffCostBase = BASE_STAFF_COST_PER_TILE * sizeOpt.tiles * Math.max(0.7, scaleFactor);
+    const opexBase = (totalRacks * maintenancePerRack) + staffCostBase;
 
     const design: SPCNDesign = {
       id: crypto.randomUUID(),
@@ -465,9 +749,18 @@ export const Designs = {
       tiles: sizeOpt.tiles,
       totalMW,
       totalRacks,
-      buildCost: totalBuildCost,
+      buildCost: capex.total,
       pue: coolingOpt.pue,
       reliability: redundancyOpt.reliability,
+      // CapEx breakdown
+      capexShell: capex.shell,
+      capexPower: capex.powerInfra,
+      capexCooling: capex.coolingInfra,
+      capexNetwork: capex.networkInfra,
+      // OpEx base values
+      opexBase,
+      maintenancePerRack,
+      staffCostBase,
     };
 
     this.spcnDesigns.push(design);
@@ -487,14 +780,24 @@ export const Designs = {
     const tierOpt = typeOpt.tiers.find(t => t.id === tier)!;
     const nodeCount = nodesSlider ? Number(nodesSlider.value) : tierOpt.defaultNodes;
 
+    const kwPerRack = tierOpt.kwPerNode * nodeCount;
+    const capexPerRack = tierOpt.costPerNode * nodeCount;
+    const maintenancePerMonth = (capexPerRack * tierOpt.maintenancePct) / 12;
+
+    // Power cost preview (using PUE 1.5, NoVA rates - actual cost depends on DC placement)
+    const opexPower = calculateRackOpEx(kwPerRack, 1.5, 'nova');
+
     const design: RackDesign = {
       id: crypto.randomUUID(),
       name,
       type,
       tier,
       nodeCount,
-      kwPerRack: tierOpt.kwPerNode * nodeCount,
+      kwPerRack,
       revenuePerRack: tierOpt.revenuePerNode * nodeCount,
+      capexPerRack,
+      opexPower,
+      opexMaintenance: maintenancePerMonth,
     };
 
     this.rackDesigns.push(design);
@@ -525,10 +828,22 @@ export const Designs = {
       return;
     }
 
+    // Format currency helper
+    const fmt = (n: number) => {
+      if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+      if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+      if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+      return `$${n.toFixed(0)}`;
+    };
+
     this.spcnList.innerHTML = this.spcnDesigns.map(d => {
       const cooling = CoolingOptions.find(c => c.id === d.cooling);
       const power = PowerDensityOptions.find(p => p.id === d.powerDensity);
+      const network = NetworkOptions.find(n => n.id === d.network);
       const size = DCSizeOptions.find(s => s.id === d.size);
+
+      // Estimate OpEx for NoVA region
+      const opex = calculateOpEx(d.totalMW, d.totalRacks, d.tiles, d.pue, 'nova');
 
       return `
         <div class="design-card" data-id="${d.id}">
@@ -540,12 +855,22 @@ export const Designs = {
             <div class="spec"><span class="spec-label">Size</span><span class="spec-value">${size?.name || d.tiles + ' tiles'}</span></div>
             <div class="spec"><span class="spec-label">Cooling</span><span class="spec-value">${cooling?.name}</span></div>
             <div class="spec"><span class="spec-label">Power</span><span class="spec-value">${power?.name}</span></div>
+            <div class="spec"><span class="spec-label">Network</span><span class="spec-value">${network?.name}</span></div>
           </div>
           <div class="design-stats">
             <div class="stat"><span class="stat-value">${d.totalMW?.toFixed(1) || '0'}</span><span class="stat-label">MW</span></div>
             <div class="stat"><span class="stat-value">${d.totalRacks?.toLocaleString() || '0'}</span><span class="stat-label">racks</span></div>
-            <div class="stat"><span class="stat-value">$${((d.buildCost || 0) / 1_000_000).toFixed(0)}M</span><span class="stat-label">cost</span></div>
             <div class="stat"><span class="stat-value">${d.pue.toFixed(2)}</span><span class="stat-label">PUE</span></div>
+          </div>
+          <div class="design-costs">
+            <div class="cost-item">
+              <span class="cost-label">CapEx</span>
+              <span class="cost-value">${fmt(d.buildCost || 0)}</span>
+            </div>
+            <div class="cost-item">
+              <span class="cost-label">OpEx</span>
+              <span class="cost-value">${fmt(opex.total)}/mo</span>
+            </div>
           </div>
         </div>
       `;
@@ -560,9 +885,22 @@ export const Designs = {
       return;
     }
 
+    // Format currency helper
+    const fmt = (n: number) => {
+      if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+      if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+      return `$${n.toFixed(0)}`;
+    };
+
     this.rackList.innerHTML = this.rackDesigns.map(d => {
       const type = RackTypeOptions.find(t => t.id === d.type);
       const tier = type?.tiers.find(t => t.id === d.tier);
+
+      // Calculate totals (handle legacy designs without new fields)
+      const capex = d.capexPerRack || 0;
+      const opexTotal = (d.opexPower || 0) + (d.opexMaintenance || 0);
+      const margin = d.revenuePerRack - opexTotal;
+      const marginPct = d.revenuePerRack > 0 ? (margin / d.revenuePerRack) * 100 : 0;
 
       return `
         <div class="design-card" data-id="${d.id}">
@@ -576,8 +914,19 @@ export const Designs = {
             <div class="spec"><span class="spec-label">Nodes</span><span class="spec-value">${d.nodeCount || 0}</span></div>
           </div>
           <div class="design-stats">
-            <div class="stat"><span class="stat-value">${d.kwPerRack.toFixed(1)}</span><span class="stat-label">kW/rack</span></div>
-            <div class="stat"><span class="stat-value">$${(d.revenuePerRack / 1000).toFixed(0)}K</span><span class="stat-label">/mo</span></div>
+            <div class="stat"><span class="stat-value">${d.kwPerRack.toFixed(1)}</span><span class="stat-label">kW</span></div>
+            <div class="stat"><span class="stat-value">${fmt(d.revenuePerRack)}</span><span class="stat-label">rev/mo</span></div>
+            <div class="stat"><span class="stat-value" style="color: ${margin >= 0 ? '#4CAF50' : '#f44336'}">${marginPct.toFixed(0)}%</span><span class="stat-label">margin</span></div>
+          </div>
+          <div class="design-costs">
+            <div class="cost-item">
+              <span class="cost-label">CapEx</span>
+              <span class="cost-value">${fmt(capex)}</span>
+            </div>
+            <div class="cost-item">
+              <span class="cost-label">OpEx</span>
+              <span class="cost-value">${fmt(opexTotal)}/mo</span>
+            </div>
           </div>
         </div>
       `;

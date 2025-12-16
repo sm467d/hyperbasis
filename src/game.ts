@@ -7,7 +7,7 @@ import { session } from './api';
 import { Economy, setEconomyGameRef } from './economy';
 import { Designs } from './designs';
 import { CampusManager } from './campus';
-import { CampusView, setCampusGameRef } from './campusView';
+import { CampusView, DCView, setCampusGameRef } from './campusView';
 
 // UI reference (set via setUI to avoid circular dependency)
 let uiRef: {
@@ -115,7 +115,7 @@ export const Game = {
   config: null as GameConfigType | null,
   capital: 0,
   ownedTiles: [] as string[],
-  currentView: 'na-map' as 'na-map' | 'metro' | 'campus',
+  currentView: 'na-map' as 'na-map' | 'metro' | 'campus' | 'dc',
 
   gameScreen: null as HTMLElement | null,
   companyNameEl: null as HTMLElement | null,
@@ -149,8 +149,9 @@ export const Game = {
     setEconomyGameRef(this);
     setCampusGameRef(this);
 
-    // Initialize campus view
+    // Initialize campus and DC views
     CampusView.init();
+    DCView.init();
 
     this.bindEvents();
     this.loadTheme();
@@ -377,11 +378,12 @@ export const Game = {
     }
   },
 
-  showView(view: 'na-map' | 'metro' | 'campus'): void {
+  showView(view: 'na-map' | 'metro' | 'campus' | 'dc'): void {
     this.currentView = view;
     this.viewNaMap?.classList.toggle('active', view === 'na-map');
     this.viewMetro?.classList.toggle('active', view === 'metro');
     document.getElementById('view-campus')?.classList.toggle('active', view === 'campus');
+    document.getElementById('view-dc')?.classList.toggle('active', view === 'dc');
   },
 
   showCampus(campusId: string): void {

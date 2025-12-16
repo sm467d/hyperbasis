@@ -1231,11 +1231,6 @@ body {
 .column-title {
     display: flex;
     align-items: center;
-    gap: 10px;
-}
-
-.column-icon {
-    font-size: 20px;
 }
 
 .column-title h3 {
@@ -1308,8 +1303,16 @@ body {
     overflow-y: auto;
 }
 
+.design-modal-content.design-modal-wide {
+    width: 700px;
+}
+
 .design-modal .design-form {
     padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    width: 100%;
 }
 
 .modal-header {
@@ -1379,6 +1382,48 @@ body {
     border-radius: 0 0 12px 12px;
 }
 
+/* Split layout for wide modals */
+.modal-body-split {
+    display: flex;
+    gap: 20px;
+    padding: 20px 24px;
+}
+
+.modal-form-side {
+    flex: 1;
+}
+
+.modal-form-side .form-row {
+    padding: 0;
+    margin-bottom: 14px;
+}
+
+.modal-form-side .form-row:last-child {
+    margin-bottom: 0;
+}
+
+.modal-calc-side {
+    width: 220px;
+    flex-shrink: 0;
+}
+
+.calc-side-header {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.modal-calc-side .form-calc {
+    margin: 0;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 12px;
+}
+
 /* Rack nodes slider in modal */
 .design-modal .slider-input {
     width: 100%;
@@ -1415,14 +1460,45 @@ body {
 .design-cards .design-card {
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    padding: 16px;
+    border-radius: 6px;
+    padding: 12px;
     transition: all 0.15s;
+    max-width: 280px;
 }
 
 .design-cards .design-card:hover {
     border-color: #3a3a3a;
     background: #1e1e1e;
+}
+
+.design-cards .design-header {
+    margin-bottom: 8px;
+}
+
+.design-cards .design-name {
+    font-size: 13px;
+}
+
+.design-cards .design-specs {
+    gap: 4px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+}
+
+.design-cards .spec {
+    font-size: 11px;
+}
+
+.design-cards .design-stats {
+    gap: 12px;
+}
+
+.design-cards .stat-value {
+    font-size: 14px;
+}
+
+.design-cards .stat-label {
+    font-size: 9px;
 }
 
 /* Responsive design page */
@@ -1681,6 +1757,81 @@ body {
 }
 
 .calc-value {
+    font-size: 13px;
+    color: #4a9eff;
+    font-family: 'Aptos Mono', monospace;
+}
+
+.calc-section {
+    margin-bottom: 12px;
+}
+
+.calc-section:last-child {
+    margin-bottom: 0;
+}
+
+.calc-section-header {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #222;
+}
+
+.calc-row.calc-sub {
+    padding-left: 8px;
+}
+
+.calc-row.calc-sub .calc-label {
+    color: #666;
+    font-size: 11px;
+}
+
+.calc-row.calc-sub .calc-value {
+    font-size: 12px;
+    color: #888;
+}
+
+.calc-row.calc-total {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid #333;
+}
+
+.calc-row.calc-total .calc-label {
+    color: #aaa;
+    font-weight: 500;
+}
+
+.calc-row.calc-total .calc-value {
+    color: #4a9eff;
+    font-weight: 500;
+}
+
+/* Design card costs */
+.design-costs {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #222;
+}
+
+.cost-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cost-label {
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+}
+
+.cost-value {
     font-size: 13px;
     color: #4a9eff;
     font-family: 'Aptos Mono', monospace;
@@ -2387,87 +2538,103 @@ body.light-theme .design-modal .form-actions {
 /* Campus View                                  */
 /* ============================================ */
 
-#view-campus {
+#view-campus,
+#view-dc {
     display: none;
 }
 
-#view-campus.active {
-    display: block;
+#view-campus.active,
+#view-dc.active {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
-.campus-content {
+.campus-content,
+.dc-content {
     display: flex;
     flex-direction: column;
     height: 100%;
-    position: relative;
 }
 
-.campus-header {
+.campus-header,
+.dc-header {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 16px 20px;
+    padding: 12px 20px;
     background: #111;
     border-bottom: 1px solid #222;
 }
 
-.campus-header .back-btn {
-    padding: 8px 16px;
+.campus-header .back-btn,
+.dc-header .back-btn {
+    padding: 6px 12px;
     background: transparent;
     border: 1px solid #333;
     border-radius: 4px;
     color: #888;
     cursor: pointer;
-    transition: all 0.2s;
+    font-size: 13px;
+    font-family: inherit;
 }
 
-.campus-header .back-btn:hover {
+.campus-header .back-btn:hover,
+.dc-header .back-btn:hover {
     border-color: #555;
     color: #fff;
 }
 
-.campus-title {
-    font-size: 20px;
+.campus-title,
+.dc-title {
+    font-size: 16px;
     font-weight: 600;
     color: #fff;
     flex: 1;
 }
 
-.campus-stats {
+.campus-stats,
+.dc-stats {
     display: flex;
-    gap: 20px;
+    gap: 16px;
 }
 
-.campus-stats .stat {
-    color: #888;
-    font-size: 14px;
+.campus-stats .stat,
+.dc-stats .stat {
+    color: #666;
+    font-size: 13px;
 }
 
-.campus-stats .stat strong {
+.campus-stats .stat strong,
+.dc-stats .stat strong {
     color: #fff;
     font-weight: 600;
 }
 
-.campus-body {
+.campus-body,
+.dc-body {
     display: flex;
     flex: 1;
     overflow: hidden;
 }
 
-.campus-grid-container {
+.campus-grid-container,
+.dc-grid-container {
     flex: 1;
     padding: 20px;
     overflow: auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
-.campus-grid {
+.campus-grid,
+.dc-grid {
     display: grid;
     gap: 2px;
-    background: #1a1a1a;
-    padding: 10px;
+    background: #151515;
+    padding: 12px;
     border-radius: 8px;
 }
 
@@ -2475,153 +2642,269 @@ body.light-theme .design-modal .form-actions {
     width: 40px;
     height: 40px;
     background: #222;
-    border-radius: 2px;
-    transition: all 0.2s;
-}
-
-.campus-cell.dc {
-    background: #1a4a3a;
-}
-
-.campus-cell.dc-start {
-    border-top-left-radius: 4px;
-}
-
-.campus-cell.dc-placeholder {
-    background: rgba(0, 150, 100, 0.3);
-    border: 2px dashed #0a6;
-}
-
-.campus-cell.dc-invalid {
-    background: rgba(150, 50, 50, 0.3);
-    border: 2px dashed #a33;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.1s;
+    position: relative;
 }
 
 .campus-cell:hover {
     background: #2a2a2a;
 }
 
-.campus-cell.dc:hover {
-    background: #2a5a4a;
+.campus-cell.dc-occupied {
+    background: #1a3a2a;
+    cursor: pointer;
 }
 
-.campus-sidebar {
-    width: 300px;
+.campus-cell.dc-occupied:hover {
+    background: #254a3a;
+}
+
+.campus-cell.dc-origin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dc-label {
+    font-size: 9px;
+    color: #6a9;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 36px;
+}
+
+.campus-cell.dc-preview-valid {
+    background: rgba(50, 180, 100, 0.3);
+    border: 2px solid rgba(50, 180, 100, 0.6);
+}
+
+.campus-cell.dc-preview-invalid {
+    background: rgba(180, 50, 50, 0.3);
+    border: 2px solid rgba(180, 50, 50, 0.6);
+}
+
+.campus-cell.dc-preview-locked {
+    background: rgba(50, 150, 220, 0.4);
+    border: 2px solid rgba(50, 150, 220, 0.8);
+}
+
+/* Rack grid (inside DC view) */
+.rack-slot {
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
+    transition: all 0.1s;
+}
+
+.rack-slot.rack-empty {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+}
+
+.rack-slot.rack-filled {
+    background: #2a4a6a;
+    border: 1px solid #3a6a9a;
+}
+
+/* Sidebar */
+.campus-sidebar,
+.dc-sidebar {
+    width: 260px;
     background: #111;
     border-left: 1px solid #222;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
 }
 
-.campus-dcs-list h3 {
-    font-size: 14px;
+.sidebar-section {
+    padding: 16px;
+    border-bottom: 1px solid #222;
+}
+
+.sidebar-section:last-child {
+    border-bottom: none;
+}
+
+.sidebar-section h3 {
+    font-size: 11px;
     font-weight: 600;
-    color: #888;
+    color: #666;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
-#campus-dc-list {
+/* Design picker cards */
+.design-picker {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 8px;
 }
 
-.no-dcs {
+.design-pick-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.design-pick-card:hover {
+    border-color: #3a3a3a;
+    background: #1e1e1e;
+}
+
+.design-pick-card.selected {
+    border-color: #4a9eff;
+    background: #1a2a3a;
+}
+
+.design-pick-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.design-pick-specs {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: #666;
+}
+
+.design-pick-specs span {
+    color: #888;
+}
+
+/* Built items list */
+.built-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.built-item {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.built-item:hover {
+    border-color: #3a3a3a;
+    background: #1e1e1e;
+}
+
+.built-item-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.built-item-specs {
+    display: flex;
+    gap: 10px;
+    font-size: 10px;
+    color: #666;
+}
+
+.empty-designs,
+.empty-list {
     color: #555;
-    font-size: 14px;
-    padding: 20px;
+    font-size: 12px;
+    padding: 12px;
     text-align: center;
 }
 
-.dc-card {
-    background: #1a1a1a;
-    border-radius: 8px;
-    padding: 14px;
+.empty-designs a {
+    color: #4a9eff;
 }
 
-.dc-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.dc-card-name {
-    font-weight: 600;
-    color: #fff;
-}
-
-.dc-card-size {
-    font-size: 12px;
-    color: #666;
-}
-
-.dc-card-stats {
-    display: flex;
-    gap: 16px;
-}
-
-.dc-card-stat {
-    font-size: 12px;
-}
-
-.dc-card-stat-value {
-    font-weight: 600;
-    color: #fff;
-}
-
-.dc-card-stat-label {
-    color: #666;
-    margin-left: 4px;
-}
-
-#build-dc-btn {
-    width: 100%;
-}
-
-/* Campus Modal */
-.campus-modal {
+/* Placement confirmation */
+.placement-confirm {
     display: none;
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.placement-confirm.active {
+    display: block;
+}
+
+.placement-confirm-content {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    z-index: 100;
-}
-
-.campus-modal.active {
-    display: flex;
-}
-
-.campus-modal .modal-content {
+    gap: 10px;
     background: #1a1a1a;
-    padding: 24px;
-    border-radius: 12px;
-    width: 400px;
-    max-width: 90%;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.campus-modal h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-.campus-modal .help-text {
-    color: #888;
+.placement-confirm input {
+    width: 100px;
+    padding: 6px 10px;
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
     font-size: 13px;
+    font-family: inherit;
 }
 
-.modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-    margin-top: 20px;
+.placement-confirm input:focus {
+    outline: none;
+    border-color: #4a9eff;
+}
+
+.placement-cost,
+.placement-label {
+    font-size: 13px;
+    color: #4a9eff;
+    font-weight: 600;
+    font-family: 'Aptos Mono', monospace;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+
+.btn-small.btn-primary {
+    background: #2a4a6a;
+    border: 1px solid #3a6a9a;
+    color: #8ac4ff;
+}
+
+.btn-small.btn-primary:hover {
+    background: #3a5a7a;
+}
+
+.btn-small.btn-secondary {
+    background: #222;
+    border: 1px solid #333;
+    color: #888;
+}
+
+.btn-small.btn-secondary:hover {
+    background: #2a2a2a;
+    color: #fff;
 }

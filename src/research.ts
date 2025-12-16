@@ -343,8 +343,33 @@ export const Research = {
   },
 
   addPoints(amount: number): void {
+    const oldPoints = this.points;
     this.points += amount;
     this.updatePointsDisplay();
+
+    // Check if any new research became available and re-render if so
+    if (this.checkForNewlyAvailable(oldPoints)) {
+      this.render();
+    }
+  },
+
+  // Check if any research items became newly available after points increased
+  checkForNewlyAvailable(oldPoints: number): boolean {
+    for (const [branchId, branch] of Object.entries(ResearchTree)) {
+      for (const [subId, sub] of Object.entries(branch.subcategories)) {
+        const currentLevel = this.getLevel(branchId, subId);
+        const nextLevel = currentLevel + 1;
+        const levelData = sub.levels.find(l => l.level === nextLevel);
+
+        if (levelData) {
+          // Was not affordable before, is affordable now
+          if (oldPoints < levelData.cost && this.points >= levelData.cost) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   },
 
   getState(): ResearchState {
