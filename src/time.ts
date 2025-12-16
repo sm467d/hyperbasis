@@ -160,7 +160,7 @@ export const GameTime = {
       this.speedBtn.textContent = `${this.speed}x`;
     }
     if (this.pauseBtn) {
-      this.pauseBtn.textContent = this.paused ? '▶' : '⏸';
+      this.pauseBtn.textContent = this.paused ? '▶' : '||';
     }
   },
 

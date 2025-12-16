@@ -1,4 +1,3 @@
-import type { Save } from './types';
 import { Auth, SaveManager } from './auth';
 import { GameConfig, Game, setUIRef } from './game';
 import { Metro } from './metro';
@@ -25,22 +24,27 @@ export const LoadScreen = {
     this.screen?.classList.add('active');
   },
 
-  hide(): void {
+  hide(showMenu: boolean = true): void {
     this.screen?.classList.remove('active');
-    UI.showMainMenu();
+    if (showMenu) {
+      UI.showMainMenu();
+    }
   },
 
-  renderSaves(): void {
+  async renderSaves(): Promise<void> {
     if (!this.savesList) return;
 
-    const saves = SaveManager.getSaves();
-    this.savesList.innerHTML = '';
+    this.savesList.innerHTML = '<div class="loading">Loading saves...</div>';
+
+    const saves = await SaveManager.getSaves();
+    console.log('Loaded saves:', saves);
 
     if (saves.length === 0) {
       this.savesList.innerHTML = '<div class="no-saves">No saved games</div>';
       return;
     }
 
+    this.savesList.innerHTML = '';
     const sortedSaves = [...saves].sort((a, b) => b.savedAt - a.savedAt);
 
     sortedSaves.forEach(save => {
@@ -55,37 +59,44 @@ export const LoadScreen = {
           <div class="save-name">${save.companyName}</div>
           <div class="save-details">${save.difficulty} · ${save.ownedTiles.length} tiles · ${dateStr}</div>
         </div>
-        <div class="save-capital">$${save.capital.toLocaleString()}</div>
+        <div class="save-capital">$${Math.floor(save.capital).toLocaleString()}</div>
         <button class="save-delete" data-id="${save.id}">Delete</button>
       `;
 
-      item.addEventListener('click', (e) => {
+      item.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
         if (!target.classList.contains('save-delete')) {
-          this.loadSave(save);
+          await this.loadSave(save.id);
         }
       });
 
       const deleteBtn = item.querySelector('.save-delete');
-      deleteBtn?.addEventListener('click', (e) => {
+      deleteBtn?.addEventListener('click', async (e) => {
         e.stopPropagation();
-        this.deleteSave(save.id);
+        await this.deleteSave(save.id);
       });
 
       this.savesList!.appendChild(item);
     });
   },
 
-  loadSave(save: Save): void {
-    this.hide();
-    Game.load(save);
+  async loadSave(gameId: number): Promise<void> {
+    console.log('Loading game:', gameId);
+    const save = await SaveManager.loadGame(gameId);
+    console.log('Loaded save data:', save);
+    if (save) {
+      this.hide(false);  // Don't show main menu, we're loading a game
+      Game.load(save);
+    } else {
+      console.error('Failed to load save');
+    }
   },
 
-  deleteSave(saveId: number): void {
+  async deleteSave(saveId: number): Promise<void> {
     if (confirm('Delete this save?')) {
-      SaveManager.deleteSave(saveId);
-      this.renderSaves();
-      UI.updateLoadGameBtn();
+      await SaveManager.deleteSave(saveId);
+      await this.renderSaves();
+      await UI.updateLoadGameBtn();
     }
   }
 };
@@ -129,19 +140,19 @@ export const UI = {
       tab.addEventListener('click', () => this.switchTab(tab.dataset.tab || ''));
     });
 
-    this.loginForm?.addEventListener('submit', (e) => {
+    this.loginForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = (document.getElementById('login-username') as HTMLInputElement).value;
       const password = (document.getElementById('login-password') as HTMLInputElement).value;
-      this.handleLogin(username, password);
+      await this.handleLogin(username, password);
     });
 
-    this.signupForm?.addEventListener('submit', (e) => {
+    this.signupForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = (document.getElementById('signup-username') as HTMLInputElement).value;
       const password = (document.getElementById('signup-password') as HTMLInputElement).value;
       const confirm = (document.getElementById('signup-confirm') as HTMLInputElement).value;
-      this.handleSignup(username, password, confirm);
+      await this.handleSignup(username, password, confirm);
     });
 
     this.logoutBtn?.addEventListener('click', () => this.handleLogout());
@@ -157,9 +168,10 @@ export const UI = {
     });
   },
 
-  updateLoadGameBtn(): void {
+  async updateLoadGameBtn(): Promise<void> {
     if (this.loadGameBtn) {
-      this.loadGameBtn.disabled = !SaveManager.hasSaves();
+      const hasSaves = await SaveManager.hasSaves();
+      this.loadGameBtn.disabled = !hasSaves;
     }
   },
 
@@ -179,24 +191,24 @@ export const UI = {
     this.clearErrors();
   },
 
-  handleLogin(username: string, password: string): void {
-    const result = Auth.login(username, password);
+  async handleLogin(username: string, password: string): Promise<void> {
+    const result = await Auth.login(username, password);
     if (result.success) {
-      this.showMainMenu();
+      await this.showMainMenu();
     } else {
       this.showError('login-error', result.error || 'Login failed');
     }
   },
 
-  handleSignup(username: string, password: string, confirm: string): void {
+  async handleSignup(username: string, password: string, confirm: string): Promise<void> {
     if (password !== confirm) {
       this.showError('signup-error', 'Passwords do not match');
       return;
     }
 
-    const result = Auth.signup(username, password);
+    const result = await Auth.signup(username, password);
     if (result.success) {
-      this.showMainMenu();
+      await this.showMainMenu();
     } else {
       this.showError('signup-error', result.error || 'Signup failed');
     }
@@ -238,16 +250,14 @@ export const UI = {
     this.clearForms();
   },
 
-  showMainMenu(): void {
+  async showMainMenu(): Promise<void> {
     this.landing?.classList.add('hidden');
     this.mainMenu?.classList.remove('hidden');
     this.mainMenu?.classList.add('active');
     if (this.displayUsername) {
       this.displayUsername.textContent = Auth.getCurrentUser() || '';
     }
-    if (this.loadGameBtn) {
-      this.loadGameBtn.disabled = !SaveManager.hasSaves();
-    }
+    await this.updateLoadGameBtn();
   },
 
   hideMainMenu(): void {

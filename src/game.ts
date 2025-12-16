@@ -1,8 +1,10 @@
-import type { GameConfig as GameConfigType, Save } from './types';
+import type { GameConfig as GameConfigType } from './types';
 import { SaveManager } from './auth';
 import { Research } from './research';
 import { Metro, MetroData, setGameRef } from './metro';
 import { GameTime } from './time';
+import { session } from './api';
+import { Economy, setEconomyGameRef } from './economy';
 
 // UI reference (set via setUI to avoid circular dependency)
 let uiRef: {
@@ -84,10 +86,25 @@ export const GameConfig = {
     };
   },
 
-  startGame(): void {
+  async startGame(): Promise<void> {
     const config = this.getConfig();
+    if (this.startBtn) {
+      this.startBtn.textContent = 'Starting...';
+      (this.startBtn as HTMLButtonElement).disabled = true;
+    }
     this.hide();
-    Game.start(config);
+    try {
+      await Game.start(config);
+    } catch (err) {
+      console.error('Failed to start game:', err);
+      alert('Failed to start game. Make sure the server is running.');
+      this.show();
+    } finally {
+      if (this.startBtn) {
+        this.startBtn.textContent = 'Start Game';
+        (this.startBtn as HTMLButtonElement).disabled = false;
+      }
+    }
   }
 };
 
@@ -122,8 +139,9 @@ export const Game = {
     this.sidebarBtns = document.querySelectorAll('.game-sidebar .sidebar-btn');
     this.tabPanels = document.querySelectorAll('.game-main .tab-panel');
 
-    // Set up cross-module reference
+    // Set up cross-module references
     setGameRef(this);
+    setEconomyGameRef(this);
 
     this.bindEvents();
   },
@@ -156,10 +174,24 @@ export const Game = {
     }
   },
 
-  start(config: GameConfigType): void {
+  async start(config: GameConfigType): Promise<void> {
     this.config = config;
     this.capital = config.startingCapital;
     this.ownedTiles = [];
+
+    // Create game in backend
+    const gameId = await SaveManager.createGame(
+      config.companyName,
+      config.startingCapital,
+      config.difficulty,
+      config.region
+    );
+
+    if (!gameId) {
+      console.error('Failed to create game');
+      uiRef?.showMainMenu();
+      return;
+    }
 
     if (this.companyNameEl) this.companyNameEl.textContent = config.companyName;
     this.updateCapitalDisplay();
@@ -170,6 +202,10 @@ export const Game = {
     Research.points = 100;
     Research.init();
 
+    // Initialize economy
+    Economy.reset();
+    Economy.init();
+
     // Initialize and start time
     GameTime.reset();
     GameTime.init();
@@ -178,7 +214,22 @@ export const Game = {
     this.gameScreen?.classList.add('active');
   },
 
-  load(save: Save): void {
+  load(save: {
+    id: number;
+    companyName: string;
+    capital: number;
+    ownedTiles: string[];
+    difficulty: string;
+    region: string;
+    research: { state: { [key: string]: number }; points: number };
+    time: {
+      date: { year: number; month: number; day: number };
+      totalDays: number;
+      speed: number;
+      paused: boolean;
+    };
+    economy?: { monthlyRevenue: number; researchBudget: number };
+  }): void {
     this.config = {
       companyName: save.companyName,
       startingCapital: save.capital,
@@ -188,12 +239,23 @@ export const Game = {
     this.capital = save.capital;
     this.ownedTiles = save.ownedTiles || [];
 
+    // Set current game ID for future saves
+    session.setCurrentGameId(save.id);
+
     if (this.companyNameEl) this.companyNameEl.textContent = save.companyName;
     this.updateCapitalDisplay();
     this.showView('na-map');
     this.switchTab('home');
 
     Research.loadState(save.research || { state: {}, points: 100 });
+
+    // Initialize economy
+    Economy.init();
+    if (save.economy) {
+      Economy.loadState(save.economy);
+    } else {
+      Economy.reset();
+    }
 
     // Load time state
     GameTime.init();
@@ -207,7 +269,7 @@ export const Game = {
     this.gameScreen?.classList.add('active');
   },
 
-  save(): void {
+  async save(): Promise<void> {
     if (!this.config) return;
 
     const gameState = {
@@ -217,10 +279,12 @@ export const Game = {
       difficulty: this.config.difficulty,
       region: this.config.region,
       research: Research.getState(),
-      time: GameTime.getState()
+      time: GameTime.getState(),
+      economy: Economy.getState()
     };
 
-    if (SaveManager.saveGame(gameState)) {
+    const success = await SaveManager.saveGame(gameState);
+    if (success) {
       if (this.saveBtn) {
         this.saveBtn.textContent = 'Saved!';
         setTimeout(() => {
@@ -228,12 +292,19 @@ export const Game = {
         }, 1000);
       }
       uiRef?.updateLoadGameBtn();
+    } else {
+      if (this.saveBtn) {
+        this.saveBtn.textContent = 'Error!';
+        setTimeout(() => {
+          if (this.saveBtn) this.saveBtn.textContent = 'Save';
+        }, 1000);
+      }
     }
   },
 
   updateCapitalDisplay(): void {
     if (this.capitalEl) {
-      this.capitalEl.textContent = '$' + this.capital.toLocaleString();
+      this.capitalEl.textContent = '$' + Math.floor(this.capital).toLocaleString();
     }
   },
 
@@ -254,6 +325,7 @@ export const Game = {
 
   returnToMenu(): void {
     GameTime.pause();
+    session.clearCurrentGameId();
     this.gameScreen?.classList.remove('active');
     uiRef?.showMainMenu();
   },

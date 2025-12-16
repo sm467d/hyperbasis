@@ -1,32 +1,8 @@
-import type { Users, Session, Save, GameState } from './types';
+import type { GameState } from './types';
+import { authApi, gamesApi, session, type GameData } from './api';
 
 export const Auth = {
-  getUsers(): Users {
-    const users = localStorage.getItem('hyperbasis_users');
-    return users ? JSON.parse(users) : {};
-  },
-
-  saveUsers(users: Users): void {
-    localStorage.setItem('hyperbasis_users', JSON.stringify(users));
-  },
-
-  getSession(): Session | null {
-    const session = localStorage.getItem('hyperbasis_session');
-    return session ? JSON.parse(session) : null;
-  },
-
-  saveSession(username: string): void {
-    localStorage.setItem('hyperbasis_session', JSON.stringify({
-      username,
-      loginTime: Date.now()
-    }));
-  },
-
-  clearSession(): void {
-    localStorage.removeItem('hyperbasis_session');
-  },
-
-  signup(username: string, password: string): { success: boolean; error?: string } {
+  async signup(username: string, password: string): Promise<{ success: boolean; error?: string }> {
     if (!username || !password) {
       return { success: false, error: 'Username and password required' };
     }
@@ -37,113 +13,155 @@ export const Auth = {
       return { success: false, error: 'Password must be at least 4 characters' };
     }
 
-    const users = this.getUsers();
-    if (users[username]) {
-      return { success: false, error: 'Username already exists' };
+    try {
+      const result = await authApi.signup(username, password);
+      session.set(result.user.id, result.user.username);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : 'Signup failed' };
     }
-
-    users[username] = {
-      password: password,
-      createdAt: Date.now(),
-      saves: []
-    };
-
-    this.saveUsers(users);
-    this.saveSession(username);
-    return { success: true };
   },
 
-  login(username: string, password: string): { success: boolean; error?: string } {
+  async login(username: string, password: string): Promise<{ success: boolean; error?: string }> {
     if (!username || !password) {
       return { success: false, error: 'Username and password required' };
     }
 
-    const users = this.getUsers();
-    if (!users[username]) {
-      return { success: false, error: 'User not found' };
+    try {
+      const result = await authApi.login(username, password);
+      session.set(result.user.id, result.user.username);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : 'Login failed' };
     }
-    if (users[username].password !== password) {
-      return { success: false, error: 'Incorrect password' };
-    }
-
-    this.saveSession(username);
-    return { success: true };
   },
 
   logout(): void {
-    this.clearSession();
+    session.clear();
+    session.clearCurrentGameId();
   },
 
   isLoggedIn(): boolean {
-    return this.getSession() !== null;
+    return session.get() !== null;
   },
 
   getCurrentUser(): string | null {
-    const session = this.getSession();
-    return session ? session.username : null;
+    const s = session.get();
+    return s ? s.username : null;
   },
 
-  hasSaves(): boolean {
-    const username = this.getCurrentUser();
-    if (!username) return false;
-    const users = this.getUsers();
-    return (users[username]?.saves?.length ?? 0) > 0;
+  getCurrentUserId(): number | null {
+    const s = session.get();
+    return s ? s.userId : null;
+  },
+
+  async hasSaves(): Promise<boolean> {
+    const userId = this.getCurrentUserId();
+    if (!userId) return false;
+    try {
+      const result = await gamesApi.list(userId);
+      return result.games.length > 0;
+    } catch {
+      return false;
+    }
   }
 };
 
+// Adapter to convert API GameData to frontend Save format
+function gameDataToSave(game: GameData) {
+  return {
+    id: game.id,
+    companyName: game.company_name,
+    capital: game.capital,
+    ownedTiles: game.ownedTiles || [],
+    difficulty: game.difficulty,
+    region: game.region,
+    research: {
+      state: (game.research?.state || {}) as { [key: string]: number },
+      points: game.research?.points || 100
+    },
+    time: game.time || {
+      date: { year: 2010, month: 1, day: 1 },
+      totalDays: 0,
+      speed: 1,
+      paused: true
+    },
+    savedAt: game.updated_at * 1000
+  };
+}
+
 export const SaveManager = {
-  getSaves(): Save[] {
-    const username = Auth.getCurrentUser();
-    if (!username) return [];
-    const users = Auth.getUsers();
-    return users[username]?.saves || [];
+  async getSaves() {
+    const userId = Auth.getCurrentUserId();
+    console.log('getSaves - userId:', userId);
+    if (!userId) {
+      console.log('getSaves - no userId, returning empty');
+      return [];
+    }
+    try {
+      const result = await gamesApi.list(userId);
+      console.log('getSaves - API result:', result);
+      return result.games.map(gameDataToSave);
+    } catch (err) {
+      console.error('getSaves - API error:', err);
+      return [];
+    }
   },
 
-  saveGame(gameState: GameState): boolean {
-    const username = Auth.getCurrentUser();
-    if (!username) return false;
+  async saveGame(gameState: GameState): Promise<boolean> {
+    const gameId = session.getCurrentGameId();
+    if (!gameId) return false;
 
-    const users = Auth.getUsers();
-    if (!users[username].saves) {
-      users[username].saves = [];
+    try {
+      await gamesApi.save(gameId, {
+        capital: gameState.capital,
+        research: gameState.research,
+        time: gameState.time
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  async createGame(companyName: string, capital: number, difficulty: string, region: string): Promise<number | null> {
+    const userId = Auth.getCurrentUserId();
+    if (!userId) {
+      console.error('createGame failed: No user logged in');
+      return null;
     }
 
-    const save: Save = {
-      id: Date.now(),
-      companyName: gameState.companyName,
-      capital: gameState.capital,
-      ownedTiles: gameState.ownedTiles,
-      difficulty: gameState.difficulty,
-      region: gameState.region,
-      research: gameState.research,
-      time: gameState.time,
-      savedAt: Date.now()
-    };
-
-    const existingIndex = users[username].saves.findIndex(s => s.companyName === save.companyName);
-    if (existingIndex !== -1) {
-      users[username].saves[existingIndex] = save;
-    } else {
-      users[username].saves.push(save);
+    try {
+      const result = await gamesApi.create(userId, companyName, capital, difficulty, region);
+      session.setCurrentGameId(result.gameId);
+      return result.gameId;
+    } catch (err) {
+      console.error('createGame API error:', err);
+      return null;
     }
-
-    Auth.saveUsers(users);
-    return true;
   },
 
-  deleteSave(saveId: number): boolean {
-    const username = Auth.getCurrentUser();
-    if (!username) return false;
-
-    const users = Auth.getUsers();
-    if (!users[username].saves) return false;
-
-    users[username].saves = users[username].saves.filter(s => s.id !== saveId);
-    Auth.saveUsers(users);
-    return true;
+  async loadGame(gameId: number) {
+    try {
+      const result = await gamesApi.get(gameId);
+      session.setCurrentGameId(gameId);
+      return gameDataToSave(result.game);
+    } catch {
+      return null;
+    }
   },
 
-  hasSaves(): boolean {
-    return this.getSaves().length > 0;
+  async deleteSave(gameId: number): Promise<boolean> {
+    try {
+      await gamesApi.delete(gameId);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  async hasSaves(): Promise<boolean> {
+    const saves = await this.getSaves();
+    return saves.length > 0;
   }
 };

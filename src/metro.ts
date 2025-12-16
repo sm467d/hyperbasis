@@ -1,4 +1,5 @@
 import type { Tile, RegionDef, MapLabel, MetroMapData, TileEntry } from './types';
+import { gamesApi, session } from './api';
 
 // Game reference (set via setGame to avoid circular dependency)
 let gameRef: {
@@ -14,37 +15,38 @@ export function setGameRef(game: typeof gameRef): void {
 
 export const MetroMapGen = {
   generateNoVA(): MetroMapData {
-    const cols = 50;
-    const rows = 40;
+    const cols = 100;
+    const rows = 80;
     const grid: (Tile | null)[] = [];
 
     const regions: RegionDef[] = [
-      { name: 'Leesburg', cx: 8, cy: 4, radius: 4, available: true, priceBase: 800000 },
-      { name: 'Purcellville', cx: 3, cy: 3, radius: 3, available: true, priceBase: 600000 },
-      { name: 'Ashburn', cx: 15, cy: 8, radius: 6, available: true, priceBase: 2000000 },
-      { name: 'Sterling', cx: 22, cy: 9, radius: 4, available: true, priceBase: 1500000 },
-      { name: 'Dulles', cx: 18, cy: 13, radius: 5, available: true, priceBase: 2200000 },
-      { name: 'Herndon', cx: 26, cy: 11, radius: 3, available: true, priceBase: 1400000 },
-      { name: 'Reston', cx: 30, cy: 12, radius: 4, available: true, priceBase: 1600000 },
-      { name: 'Chantilly', cx: 20, cy: 18, radius: 4, available: true, priceBase: 1300000 },
-      { name: 'Centreville', cx: 16, cy: 20, radius: 4, available: true, priceBase: 1000000 },
-      { name: 'Gainesville', cx: 8, cy: 18, radius: 4, available: true, priceBase: 750000 },
-      { name: 'Haymarket', cx: 4, cy: 20, radius: 3, available: true, priceBase: 650000 },
-      { name: 'Manassas', cx: 12, cy: 24, radius: 5, available: true, priceBase: 1100000 },
-      { name: 'Warrenton', cx: 4, cy: 30, radius: 4, available: true, priceBase: 550000 },
-      { name: 'Woodbridge', cx: 32, cy: 30, radius: 4, available: true, priceBase: 700000 },
-      { name: 'Stafford', cx: 28, cy: 36, radius: 4, available: true, priceBase: 450000 },
+      { name: 'Leesburg', cx: 16, cy: 8, radius: 8, available: true, priceBase: 800000 },
+      { name: 'Purcellville', cx: 6, cy: 6, radius: 6, available: true, priceBase: 600000 },
+      { name: 'Ashburn', cx: 30, cy: 16, radius: 12, available: true, priceBase: 2000000 },
+      { name: 'Sterling', cx: 44, cy: 18, radius: 8, available: true, priceBase: 1500000 },
+      { name: 'Dulles', cx: 36, cy: 26, radius: 10, available: true, priceBase: 2200000 },
+      { name: 'Herndon', cx: 52, cy: 22, radius: 6, available: true, priceBase: 1400000 },
+      { name: 'Reston', cx: 60, cy: 24, radius: 8, available: true, priceBase: 1600000 },
+      { name: 'Chantilly', cx: 40, cy: 36, radius: 8, available: true, priceBase: 1300000 },
+      { name: 'Centreville', cx: 32, cy: 40, radius: 8, available: true, priceBase: 1000000 },
+      { name: 'Gainesville', cx: 16, cy: 36, radius: 8, available: true, priceBase: 750000 },
+      { name: 'Haymarket', cx: 8, cy: 40, radius: 6, available: true, priceBase: 650000 },
+      { name: 'Manassas', cx: 24, cy: 48, radius: 10, available: true, priceBase: 1100000 },
+      { name: 'Warrenton', cx: 8, cy: 60, radius: 8, available: true, priceBase: 550000 },
+      { name: 'Woodbridge', cx: 64, cy: 60, radius: 8, available: true, priceBase: 700000 },
+      { name: 'Stafford', cx: 56, cy: 72, radius: 8, available: true, priceBase: 450000 },
+      // Tysons is now available (premium pricing)
+      { name: 'Tysons', cx: 70, cy: 28, radius: 8, available: true, priceBase: 3500000 },
       // Unavailable urban areas
-      { name: 'Tysons', cx: 35, cy: 14, radius: 4, available: false, priceBase: 0 },
-      { name: 'McLean', cx: 40, cy: 12, radius: 3, available: false, priceBase: 0 },
-      { name: 'Vienna', cx: 34, cy: 18, radius: 3, available: false, priceBase: 0 },
-      { name: 'Fairfax', cx: 30, cy: 20, radius: 4, available: false, priceBase: 0 },
-      { name: 'Falls Church', cx: 40, cy: 16, radius: 2, available: false, priceBase: 0 },
-      { name: 'Arlington', cx: 44, cy: 14, radius: 4, available: false, priceBase: 0 },
-      { name: 'Alexandria', cx: 44, cy: 22, radius: 4, available: false, priceBase: 0 },
-      { name: 'Springfield', cx: 36, cy: 26, radius: 3, available: false, priceBase: 0 },
-      { name: 'Burke', cx: 32, cy: 24, radius: 2, available: false, priceBase: 0 },
-      { name: 'Annandale', cx: 38, cy: 20, radius: 2, available: false, priceBase: 0 },
+      { name: 'McLean', cx: 80, cy: 24, radius: 6, available: false, priceBase: 0 },
+      { name: 'Vienna', cx: 68, cy: 36, radius: 6, available: false, priceBase: 0 },
+      { name: 'Fairfax', cx: 60, cy: 40, radius: 8, available: false, priceBase: 0 },
+      { name: 'Falls Church', cx: 80, cy: 32, radius: 4, available: false, priceBase: 0 },
+      { name: 'Arlington', cx: 88, cy: 28, radius: 8, available: false, priceBase: 0 },
+      { name: 'Alexandria', cx: 88, cy: 44, radius: 8, available: false, priceBase: 0 },
+      { name: 'Springfield', cx: 72, cy: 52, radius: 6, available: false, priceBase: 0 },
+      { name: 'Burke', cx: 64, cy: 48, radius: 4, available: false, priceBase: 0 },
+      { name: 'Annandale', cx: 76, cy: 40, radius: 4, available: false, priceBase: 0 },
     ];
 
     for (let y = 0; y < rows; y++) {
@@ -340,7 +342,7 @@ export const Metro = {
     const total = this.selectedTiles.reduce((sum, t) => sum + t.price, 0);
 
     if (this.selectionCount) this.selectionCount.textContent = String(count);
-    if (this.selectionTotal) this.selectionTotal.textContent = '$' + total.toLocaleString();
+    if (this.selectionTotal) this.selectionTotal.textContent = '$' + Math.floor(total).toLocaleString();
 
     if (count > 0) {
       this.selectionInfo?.classList.add('active');
@@ -352,13 +354,33 @@ export const Metro = {
     }
   },
 
-  buySelected(): void {
-    if (!gameRef) return;
+  async buySelected(): Promise<void> {
+    if (!gameRef || !this.currentMetro) return;
+
+    const gameId = session.getCurrentGameId();
+    if (!gameId) {
+      console.error('No game ID found');
+      return;
+    }
 
     const total = this.selectedTiles.reduce((sum, t) => sum + t.price, 0);
 
-    if (total <= gameRef.capital) {
-      gameRef.capital -= total;
+    if (total > gameRef.capital) {
+      return;
+    }
+
+    // Prepare tiles for API
+    const tiles = this.selectedTiles.map(tile => ({
+      id: tile.id,
+      region: tile.region,
+      price: tile.price
+    }));
+
+    try {
+      const result = await gamesApi.buyLand(gameId, this.currentMetro, tiles);
+
+      // Update local state
+      gameRef.capital = result.newCapital;
       this.selectedTiles.forEach(tile => {
         gameRef!.ownedTiles.push(tile.id);
       });
@@ -371,6 +393,8 @@ export const Metro = {
         this.renderLabels(MetroData[this.currentMetro].labels);
       }
       this.updateSelectionUI();
+    } catch (err) {
+      console.error('Failed to buy land:', err);
     }
   }
 };

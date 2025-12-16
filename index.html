@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Hyperbasis</title>
     <link rel="stylesheet" href="dist/assets/style.css">
 </head>
@@ -121,6 +122,7 @@
             <div class="game-sidebar">
                 <nav class="sidebar-nav">
                     <button class="sidebar-btn active" data-tab="home">Home</button>
+                    <button class="sidebar-btn" data-tab="finance">Finance</button>
                     <button class="sidebar-btn" data-tab="research">Research</button>
                     <button class="sidebar-btn" data-tab="design">Design</button>
                 </nav>
@@ -215,10 +217,175 @@
                     </div>
                 </div>
 
+                <!-- Finance Tab -->
+                <div class="tab-panel" id="tab-finance">
+                    <div class="finance-container">
+                        <!-- Revenue Overview -->
+                        <div class="finance-summary">
+                            <div class="summary-card revenue">
+                                <div class="card-label">Monthly Revenue</div>
+                                <div class="card-value" id="economy-revenue">$10,000,000</div>
+                                <div class="card-detail">Base income (testing)</div>
+                            </div>
+                            <div class="summary-card expenses">
+                                <div class="card-label">Research Budget</div>
+                                <div class="card-value" id="research-budget">$5,000,000</div>
+                                <div class="card-detail"><span id="rp-per-month">25.0</span> RP/month</div>
+                            </div>
+                            <div class="summary-card net">
+                                <div class="card-label">Net Income</div>
+                                <div class="card-value" id="net-income">$5,000,000</div>
+                                <div class="card-detail">Added to capital monthly</div>
+                            </div>
+                        </div>
+
+                        <!-- Budget Allocation -->
+                        <div class="finance-panel full-width">
+                            <div class="panel-header">Budget Allocation</div>
+                            <div class="panel-content">
+                                <div class="allocation-section">
+                                    <div class="allocation-row">
+                                        <div class="allocation-label">
+                                            <span class="allocation-name">Research & Development</span>
+                                            <span class="allocation-detail">OpEx - Generates <span id="rp-per-month-inline">25.0</span> RP/month</span>
+                                        </div>
+                                        <div class="allocation-control">
+                                            <div class="custom-slider" id="research-slider-container">
+                                                <div class="slider-track">
+                                                    <div class="slider-fill" id="research-slider-fill"></div>
+                                                </div>
+                                                <input type="range" id="research-slider" min="0" max="10000000" value="5000000" step="100000" class="slider-input">
+                                            </div>
+                                            <span class="allocation-value" id="research-allocation-value">$5,000,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="finance-panels">
+                            <!-- Revenue Breakdown -->
+                            <div class="finance-panel">
+                                <div class="panel-header">Revenue Breakdown</div>
+                                <div class="panel-content">
+                                    <div class="breakdown-section">
+                                        <div class="breakdown-title">By Contract Type</div>
+                                        <div class="breakdown-items" id="revenue-by-type">
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Colocation</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Compute</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Storage</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">GPU</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">HPC</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="breakdown-section">
+                                        <div class="breakdown-title">By Customer Segment</div>
+                                        <div class="breakdown-items" id="revenue-by-segment">
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Enterprise</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">SMB</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Startup</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Expense Breakdown -->
+                            <div class="finance-panel">
+                                <div class="panel-header">Expense Breakdown</div>
+                                <div class="panel-content">
+                                    <div class="breakdown-section">
+                                        <div class="breakdown-title">OpEx (Operating)</div>
+                                        <div class="breakdown-items" id="opex-items">
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Power</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Cooling</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Staffing</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Maintenance</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Network</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Tax</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                        </div>
+                                        <div class="breakdown-total">
+                                            <span class="item-label">Total OpEx</span>
+                                            <span class="item-value" id="opex-total">$0</span>
+                                        </div>
+                                    </div>
+                                    <div class="breakdown-section">
+                                        <div class="breakdown-title">CapEx (Amortized)</div>
+                                        <div class="breakdown-items" id="capex-items">
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Infrastructure</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <span class="item-label">Equipment</span>
+                                                <span class="item-value">$0</span>
+                                            </div>
+                                        </div>
+                                        <div class="breakdown-total">
+                                            <span class="item-label">Total CapEx</span>
+                                            <span class="item-value" id="capex-total">$0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
                 <!-- Research Tab -->
                 <div class="tab-panel" id="tab-research">
                     <div class="research-header">
-                        <span class="research-points-label">Research Points: <strong id="research-points">0</strong></span>
+                        <div class="research-points-main">
+                            <span class="research-points-label">Research Points</span>
+                            <span class="research-points-value" id="research-points">0</span>
+                        </div>
+                        <div class="research-points-rate">
+                            <span class="rate-label">Earning</span>
+                            <span class="rate-value" id="research-rate">0</span>
+                            <span class="rate-suffix">RP/month</span>
+                        </div>
                     </div>
                     <div class="research-tree" id="research-tree"></div>
                 </div>
