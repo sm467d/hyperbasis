@@ -91,6 +91,147 @@ const Auth = {
     }
 };
 
+// Save Manager
+const SaveManager = {
+    getSaves() {
+        const username = Auth.getCurrentUser();
+        if (!username) return [];
+        const users = Auth.getUsers();
+        return users[username]?.saves || [];
+    },
+
+    saveGame(gameState) {
+        const username = Auth.getCurrentUser();
+        if (!username) return false;
+
+        const users = Auth.getUsers();
+        if (!users[username].saves) {
+            users[username].saves = [];
+        }
+
+        const save = {
+            id: Date.now(),
+            companyName: gameState.companyName,
+            capital: gameState.capital,
+            ownedTiles: gameState.ownedTiles,
+            difficulty: gameState.difficulty,
+            region: gameState.region,
+            savedAt: Date.now()
+        };
+
+        // Check if save with same company name exists, update it
+        const existingIndex = users[username].saves.findIndex(s => s.companyName === save.companyName);
+        if (existingIndex !== -1) {
+            users[username].saves[existingIndex] = save;
+        } else {
+            users[username].saves.push(save);
+        }
+
+        Auth.saveUsers(users);
+        return true;
+    },
+
+    deleteSave(saveId) {
+        const username = Auth.getCurrentUser();
+        if (!username) return false;
+
+        const users = Auth.getUsers();
+        if (!users[username].saves) return false;
+
+        users[username].saves = users[username].saves.filter(s => s.id !== saveId);
+        Auth.saveUsers(users);
+        return true;
+    },
+
+    hasSaves() {
+        return this.getSaves().length > 0;
+    }
+};
+
+// Load Screen Controller
+const LoadScreen = {
+    init() {
+        this.screen = document.getElementById('load-screen');
+        this.savesList = document.getElementById('saves-list');
+        this.backBtn = document.getElementById('load-back-btn');
+
+        this.bindEvents();
+    },
+
+    bindEvents() {
+        this.backBtn.addEventListener('click', () => this.hide());
+    },
+
+    show() {
+        this.renderSaves();
+        this.screen.classList.add('active');
+    },
+
+    hide() {
+        this.screen.classList.remove('active');
+        UI.showMainMenu();
+    },
+
+    renderSaves() {
+        const saves = SaveManager.getSaves();
+        this.savesList.innerHTML = '';
+
+        if (saves.length === 0) {
+            this.savesList.innerHTML = '<div class="no-saves">No saved games</div>';
+            return;
+        }
+
+        // Sort by most recent
+        saves.sort((a, b) => b.savedAt - a.savedAt);
+
+        saves.forEach(save => {
+            const item = document.createElement('div');
+            item.className = 'save-item';
+
+            const date = new Date(save.savedAt);
+            const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            item.innerHTML = `
+                <div class="save-info">
+                    <div class="save-name">${save.companyName}</div>
+                    <div class="save-details">${save.difficulty} · ${save.ownedTiles.length} tiles · ${dateStr}</div>
+                </div>
+                <div class="save-capital">$${save.capital.toLocaleString()}</div>
+                <button class="save-delete" data-id="${save.id}">Delete</button>
+            `;
+
+            // Click to load (but not on delete button)
+            item.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('save-delete')) {
+                    this.loadSave(save);
+                }
+            });
+
+            // Delete button
+            const deleteBtn = item.querySelector('.save-delete');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteSave(save.id);
+            });
+
+            this.savesList.appendChild(item);
+        });
+    },
+
+    loadSave(save) {
+        this.hide();
+        Game.load(save);
+    },
+
+    deleteSave(saveId) {
+        if (confirm('Delete this save?')) {
+            SaveManager.deleteSave(saveId);
+            this.renderSaves();
+            UI.updateLoadGameBtn();
+        }
+    }
+};
+
 // Game Config Controller
 const GameConfig = {
     selectedRegion: 'north-america',
@@ -248,23 +389,57 @@ const Game = {
     config: null,
     capital: 0,
     ownedTiles: [],
+    currentView: 'na-map', // 'na-map' or 'metro'
 
     init() {
         this.gameScreen = document.getElementById('game-screen');
         this.companyNameEl = document.getElementById('game-company-name');
         this.capitalEl = document.getElementById('game-capital');
         this.menuBtn = document.getElementById('game-menu-btn');
+        this.saveBtn = document.getElementById('game-save-btn');
         this.mapTiles = document.querySelectorAll('.map-tile.metro');
+
+        // View panels
+        this.viewNaMap = document.getElementById('view-na-map');
+        this.viewMetro = document.getElementById('view-metro');
+
+        // Sidebar
+        this.sidebarBtns = document.querySelectorAll('.game-sidebar .sidebar-btn');
+        this.tabPanels = document.querySelectorAll('.game-main .tab-panel');
 
         this.bindEvents();
     },
 
     bindEvents() {
         this.menuBtn.addEventListener('click', () => this.returnToMenu());
+        this.saveBtn.addEventListener('click', () => this.save());
 
         this.mapTiles.forEach(tile => {
             tile.addEventListener('click', () => this.selectMetro(tile.dataset.metro));
         });
+
+        // Sidebar tab switching
+        this.sidebarBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
+        });
+    },
+
+    switchTab(tabName) {
+        // Update sidebar buttons
+        this.sidebarBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabName);
+        });
+
+        // Update tab panels
+        this.tabPanels.forEach(panel => {
+            panel.classList.toggle('active', panel.id === `tab-${tabName}`);
+        });
+
+        // Clear metro selection when leaving home
+        if (tabName !== 'home') {
+            Metro.clearSelection();
+            Metro.setMode('pan');
+        }
     },
 
     start(config) {
@@ -274,18 +449,62 @@ const Game = {
 
         this.companyNameEl.textContent = config.companyName;
         this.updateCapitalDisplay();
+        this.showView('na-map');
+        this.switchTab('home');
 
         this.gameScreen.classList.add('active');
+    },
+
+    load(save) {
+        this.config = {
+            companyName: save.companyName,
+            startingCapital: save.capital,
+            difficulty: save.difficulty,
+            region: save.region
+        };
+        this.capital = save.capital;
+        this.ownedTiles = save.ownedTiles || [];
+
+        this.companyNameEl.textContent = save.companyName;
+        this.updateCapitalDisplay();
+        this.showView('na-map');
+        this.switchTab('home');
+
+        this.gameScreen.classList.add('active');
+    },
+
+    save() {
+        const gameState = {
+            companyName: this.config.companyName,
+            capital: this.capital,
+            ownedTiles: this.ownedTiles,
+            difficulty: this.config.difficulty,
+            region: this.config.region
+        };
+
+        if (SaveManager.saveGame(gameState)) {
+            this.saveBtn.textContent = 'Saved!';
+            setTimeout(() => {
+                this.saveBtn.textContent = 'Save';
+            }, 1000);
+            UI.updateLoadGameBtn();
+        }
     },
 
     updateCapitalDisplay() {
         this.capitalEl.textContent = '$' + this.capital.toLocaleString();
     },
 
+    showView(view) {
+        this.currentView = view;
+        this.viewNaMap.classList.toggle('active', view === 'na-map');
+        this.viewMetro.classList.toggle('active', view === 'metro');
+    },
+
     selectMetro(metroId) {
         if (MetroData[metroId]) {
-            this.gameScreen.classList.remove('active');
             Metro.show(metroId);
+            this.showView('metro');
         } else {
             console.log('Metro not yet available:', metroId);
         }
@@ -297,7 +516,7 @@ const Game = {
     },
 
     showMap() {
-        this.gameScreen.classList.add('active');
+        this.showView('na-map');
     }
 };
 
@@ -320,9 +539,6 @@ const Metro = {
     tileElements: {},
 
     init() {
-        this.detailScreen = document.getElementById('metro-detail');
-        this.titleEl = document.getElementById('metro-title');
-        this.capitalEl = document.getElementById('metro-capital');
         this.metroContent = document.getElementById('metro-content');
         this.mapViewport = document.getElementById('map-viewport');
         this.mapWorld = document.getElementById('map-world');
@@ -452,8 +668,6 @@ const Metro = {
         this.currentMetro = metroId;
         const data = MetroData[metroId];
 
-        this.titleEl.textContent = data.name;
-        this.updateCapitalDisplay();
         this.clearSelection();
 
         // Reset view
@@ -465,21 +679,10 @@ const Metro = {
 
         this.renderGrid(data);
         this.renderLabels(data.labels);
-
-        this.detailScreen.classList.add('active');
-    },
-
-    hide() {
-        this.detailScreen.classList.remove('active');
     },
 
     goBack() {
-        this.hide();
         Game.showMap();
-    },
-
-    updateCapitalDisplay() {
-        this.capitalEl.textContent = '$' + Game.capital.toLocaleString();
     },
 
     renderGrid(data) {
@@ -603,10 +806,11 @@ const UI = {
         this.bindEvents();
         this.checkSession();
 
-        // Initialize game config, game, and metro
+        // Initialize game config, game, metro, and load screen
         GameConfig.init();
         Game.init();
         Metro.init();
+        LoadScreen.init();
     },
 
     bindEvents() {
@@ -641,10 +845,15 @@ const UI = {
             GameConfig.show();
         });
 
-        // Load Game (placeholder)
+        // Load Game
         this.loadGameBtn.addEventListener('click', () => {
-            alert('No saves available');
+            this.hideMainMenu();
+            LoadScreen.show();
         });
+    },
+
+    updateLoadGameBtn() {
+        this.loadGameBtn.disabled = !SaveManager.hasSaves();
     },
 
     switchTab(tab) {
@@ -725,7 +934,7 @@ const UI = {
         this.mainMenu.classList.remove('hidden');
         this.mainMenu.classList.add('active');
         this.displayUsername.textContent = Auth.getCurrentUser();
-        this.loadGameBtn.disabled = !Auth.hasSaves();
+        this.loadGameBtn.disabled = !SaveManager.hasSaves();
     },
 
     hideMainMenu() {

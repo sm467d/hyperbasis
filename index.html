@@ -434,7 +434,6 @@
             align-items: center;
             padding: 15px 25px;
             background: #111;
-            border-bottom: 1px solid #222;
         }
 
         .game-banner-left {
@@ -546,55 +545,6 @@
             color: #fff;
             white-space: nowrap;
             z-index: 10;
-        }
-
-        /* Metro Detail View */
-        #metro-detail {
-            display: none;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        #metro-detail.active {
-            display: flex;
-        }
-
-        .metro-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 25px;
-            background: #111;
-            border-bottom: 1px solid #222;
-        }
-
-        .metro-header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .back-btn {
-            padding: 8px 12px;
-            background: none;
-            border: 1px solid #333;
-            border-radius: 2px;
-            color: #555;
-            font-family: inherit;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .back-btn:hover {
-            border-color: #555;
-            color: #888;
-        }
-
-        .metro-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
         }
 
         .metro-content {
@@ -846,6 +796,245 @@
             color: #555;
             font-family: 'Aptos Mono', monospace;
         }
+
+        /* Game Layout with Sidebar */
+        .game-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .game-sidebar {
+            width: 200px;
+            background: #111;
+            border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 0;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #555;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            border-left: 2px solid transparent;
+        }
+
+        .sidebar-btn:hover {
+            color: #888;
+            background: #1a1a1a;
+        }
+
+        .sidebar-btn.active {
+            color: #fff;
+            background: #1a1a1a;
+            border-left-color: #fff;
+        }
+
+        .game-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Tab Panels */
+        .tab-panel {
+            display: none;
+            flex: 1;
+            position: relative;
+        }
+
+        .tab-panel.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* View Panels (within Home tab) */
+        .view-panel {
+            display: none;
+            flex: 1;
+            position: relative;
+        }
+
+        .view-panel.active {
+            display: flex;
+        }
+
+        /* Back to map button */
+        .back-to-map-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #666;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .back-to-map-btn:hover {
+            background: #222;
+            border-color: #444;
+            color: #888;
+        }
+
+        /* Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* Load Game Screen */
+        #load-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #load-screen.active {
+            display: flex;
+        }
+
+        #load-screen h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #fff;
+            margin-bottom: 40px;
+        }
+
+        .load-container {
+            background: #111;
+            padding: 30px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #222;
+        }
+
+        .saves-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .save-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .save-item:hover {
+            border-color: #444;
+            background: #151515;
+        }
+
+        .save-info {
+            flex: 1;
+        }
+
+        .save-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .save-details {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .save-capital {
+            font-size: 14px;
+            color: #888;
+            font-family: 'Aptos Mono', monospace;
+        }
+
+        .save-delete {
+            padding: 8px 12px;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #555;
+            font-family: inherit;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .save-delete:hover {
+            border-color: #666;
+            color: #888;
+        }
+
+        .no-saves {
+            text-align: center;
+            padding: 40px 20px;
+            color: #444;
+        }
+
+        .load-back-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #555;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .load-back-btn:hover {
+            border-color: #444;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -891,6 +1080,17 @@
         </div>
     </div>
 
+    <!-- Load Game Screen -->
+    <div id="load-screen">
+        <h1>Load Game</h1>
+        <div class="load-container">
+            <div class="saves-list" id="saves-list">
+                <!-- Saves will be populated here -->
+            </div>
+        </div>
+        <button class="load-back-btn" id="load-back-btn">Back</button>
+    </div>
+
     <!-- Game Config -->
     <div id="game-config">
         <h1>New Game</h1>
@@ -930,7 +1130,7 @@
         </div>
     </div>
 
-    <!-- Game Screen -->
+    <!-- Game Screen (unified layout) -->
     <div id="game-screen">
         <div class="game-banner">
             <div class="game-banner-left">
@@ -938,95 +1138,124 @@
                 <span class="capital-display" id="game-capital">$10,000,000</span>
             </div>
             <div class="game-banner-right">
+                <button class="banner-btn" id="game-save-btn">Save</button>
                 <button class="banner-btn" id="game-menu-btn">Menu</button>
             </div>
         </div>
 
-        <div class="map-container">
-            <div class="na-map" id="na-map">
-                <!-- Row 1: Canada -->
-                <div class="map-tile empty"></div>
-                <div class="map-tile empty"></div>
-                <div class="map-tile" data-name="British Columbia">BC</div>
-                <div class="map-tile" data-name="Alberta">AB</div>
-                <div class="map-tile" data-name="Saskatchewan / Manitoba">SK/MB</div>
-                <div class="map-tile metro" data-metro="toronto" data-name="Toronto">ON</div>
-                <div class="map-tile metro" data-metro="montreal" data-name="Montreal">QC</div>
-
-                <!-- Row 2: US North -->
-                <div class="map-tile metro" data-metro="seattle" data-name="Seattle">WA</div>
-                <div class="map-tile" data-name="Montana">MT</div>
-                <div class="map-tile" data-name="North Dakota">ND</div>
-                <div class="map-tile" data-name="Minnesota">MN</div>
-                <div class="map-tile metro" data-metro="chicago" data-name="Chicago">IL</div>
-                <div class="map-tile" data-name="Michigan">MI</div>
-                <div class="map-tile metro" data-metro="new-york" data-name="New York">NY</div>
-
-                <!-- Row 3: US Middle -->
-                <div class="map-tile metro" data-metro="portland" data-name="Portland">OR</div>
-                <div class="map-tile" data-name="Idaho">ID</div>
-                <div class="map-tile" data-name="Wyoming">WY</div>
-                <div class="map-tile" data-name="Nebraska">NE</div>
-                <div class="map-tile" data-name="Iowa">IA</div>
-                <div class="map-tile metro" data-metro="columbus" data-name="Columbus">OH</div>
-                <div class="map-tile metro" data-metro="nova" data-name="Northern Virginia">VA</div>
-
-                <!-- Row 4: US South -->
-                <div class="map-tile metro" data-metro="bay-area" data-name="Bay Area">CA</div>
-                <div class="map-tile metro" data-metro="phoenix" data-name="Phoenix">AZ</div>
-                <div class="map-tile" data-name="New Mexico">NM</div>
-                <div class="map-tile metro" data-metro="dallas" data-name="Dallas">TX</div>
-                <div class="map-tile" data-name="Louisiana">LA</div>
-                <div class="map-tile metro" data-metro="atlanta" data-name="Atlanta">GA</div>
-                <div class="map-tile" data-name="North Carolina">NC</div>
-
-                <!-- Row 5: US South + Mexico -->
-                <div class="map-tile empty"></div>
-                <div class="map-tile empty"></div>
-                <div class="map-tile" data-name="Mexico North">MX-N</div>
-                <div class="map-tile" data-name="Mexico Central">MX-C</div>
-                <div class="map-tile" data-name="Mexico South">MX-S</div>
-                <div class="map-tile metro" data-metro="miami" data-name="Miami">FL</div>
-                <div class="map-tile empty"></div>
+        <div class="game-body">
+            <div class="game-sidebar">
+                <nav class="sidebar-nav">
+                    <button class="sidebar-btn active" data-tab="home">Home</button>
+                    <button class="sidebar-btn" data-tab="research">Research</button>
+                    <button class="sidebar-btn" data-tab="design">Design</button>
+                </nav>
             </div>
-        </div>
-    </div>
 
-    <!-- Metro Detail View -->
-    <div id="metro-detail">
-        <div class="metro-header">
-            <div class="metro-header-left">
-                <button class="back-btn" id="metro-back-btn">← Back</button>
-                <span class="metro-title" id="metro-title">Northern Virginia</span>
-            </div>
-            <span class="capital-display" id="metro-capital">$10,000,000</span>
-        </div>
+            <div class="game-main">
+                <!-- Home Tab -->
+                <div class="tab-panel active" id="tab-home">
+                    <!-- NA Map View -->
+                    <div class="view-panel active" id="view-na-map">
+                        <div class="map-container">
+                            <div class="na-map" id="na-map">
+                                <!-- Row 1: Canada -->
+                                <div class="map-tile empty"></div>
+                                <div class="map-tile empty"></div>
+                                <div class="map-tile" data-name="British Columbia">BC</div>
+                                <div class="map-tile" data-name="Alberta">AB</div>
+                                <div class="map-tile" data-name="Saskatchewan / Manitoba">SK/MB</div>
+                                <div class="map-tile metro" data-metro="toronto" data-name="Toronto">ON</div>
+                                <div class="map-tile metro" data-metro="montreal" data-name="Montreal">QC</div>
 
-        <div class="metro-content" id="metro-content">
-            <div class="map-viewport" id="map-viewport">
-                <div class="map-world" id="map-world">
-                    <div class="land-grid" id="land-grid"></div>
-                    <div class="region-labels" id="region-labels"></div>
+                                <!-- Row 2: US North -->
+                                <div class="map-tile metro" data-metro="seattle" data-name="Seattle">WA</div>
+                                <div class="map-tile" data-name="Montana">MT</div>
+                                <div class="map-tile" data-name="North Dakota">ND</div>
+                                <div class="map-tile" data-name="Minnesota">MN</div>
+                                <div class="map-tile metro" data-metro="chicago" data-name="Chicago">IL</div>
+                                <div class="map-tile" data-name="Michigan">MI</div>
+                                <div class="map-tile metro" data-metro="new-york" data-name="New York">NY</div>
+
+                                <!-- Row 3: US Middle -->
+                                <div class="map-tile metro" data-metro="portland" data-name="Portland">OR</div>
+                                <div class="map-tile" data-name="Idaho">ID</div>
+                                <div class="map-tile" data-name="Wyoming">WY</div>
+                                <div class="map-tile" data-name="Nebraska">NE</div>
+                                <div class="map-tile" data-name="Iowa">IA</div>
+                                <div class="map-tile metro" data-metro="columbus" data-name="Columbus">OH</div>
+                                <div class="map-tile metro" data-metro="nova" data-name="Northern Virginia">VA</div>
+
+                                <!-- Row 4: US South -->
+                                <div class="map-tile metro" data-metro="bay-area" data-name="Bay Area">CA</div>
+                                <div class="map-tile metro" data-metro="phoenix" data-name="Phoenix">AZ</div>
+                                <div class="map-tile" data-name="New Mexico">NM</div>
+                                <div class="map-tile metro" data-metro="dallas" data-name="Dallas">TX</div>
+                                <div class="map-tile" data-name="Louisiana">LA</div>
+                                <div class="map-tile metro" data-metro="atlanta" data-name="Atlanta">GA</div>
+                                <div class="map-tile" data-name="North Carolina">NC</div>
+
+                                <!-- Row 5: US South + Mexico -->
+                                <div class="map-tile empty"></div>
+                                <div class="map-tile empty"></div>
+                                <div class="map-tile" data-name="Mexico North">MX-N</div>
+                                <div class="map-tile" data-name="Mexico Central">MX-C</div>
+                                <div class="map-tile" data-name="Mexico South">MX-S</div>
+                                <div class="map-tile metro" data-metro="miami" data-name="Miami">FL</div>
+                                <div class="map-tile empty"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metro Detail View -->
+                    <div class="view-panel" id="view-metro">
+                        <div class="metro-content" id="metro-content">
+                            <div class="map-viewport" id="map-viewport">
+                                <div class="map-world" id="map-world">
+                                    <div class="land-grid" id="land-grid"></div>
+                                    <div class="region-labels" id="region-labels"></div>
+                                </div>
+                            </div>
+
+                            <button class="back-to-map-btn" id="metro-back-btn">← Back to Map</button>
+
+                            <div class="mode-toggle">
+                                <button class="mode-btn active" data-mode="pan" id="mode-pan">Pan</button>
+                                <button class="mode-btn" data-mode="select" id="mode-select">Select</button>
+                            </div>
+
+                            <div class="map-controls">
+                                <button class="map-control-btn" id="zoom-in">+</button>
+                                <button class="map-control-btn" id="zoom-out">−</button>
+                            </div>
+
+                            <div class="coords-display" id="coords-display">0, 0</div>
+
+                            <div class="selection-info" id="selection-info">
+                                <span><strong id="selection-count">0</strong> tiles</span>
+                                <span>Total: <strong id="selection-total">$0</strong></span>
+                                <button class="cancel-btn" id="selection-cancel">Cancel</button>
+                                <button id="selection-buy">Buy</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mode-toggle">
-                <button class="mode-btn active" data-mode="pan" id="mode-pan">Pan</button>
-                <button class="mode-btn" data-mode="select" id="mode-select">Select</button>
-            </div>
+                <!-- Research Tab -->
+                <div class="tab-panel" id="tab-research">
+                    <div class="empty-state">
+                        <h2>Research</h2>
+                        <p>Coming soon</p>
+                    </div>
+                </div>
 
-            <div class="map-controls">
-                <button class="map-control-btn" id="zoom-in">+</button>
-                <button class="map-control-btn" id="zoom-out">−</button>
-            </div>
-
-            <div class="coords-display" id="coords-display">0, 0</div>
-
-            <div class="selection-info" id="selection-info">
-                <span><strong id="selection-count">0</strong> tiles</span>
-                <span>Total: <strong id="selection-total">$0</strong></span>
-                <button class="cancel-btn" id="selection-cancel">Cancel</button>
-                <button id="selection-buy">Buy</button>
+                <!-- Design Tab -->
+                <div class="tab-panel" id="tab-design">
+                    <div class="empty-state">
+                        <h2>Design</h2>
+                        <p>Coming soon</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
