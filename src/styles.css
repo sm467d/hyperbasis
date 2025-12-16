@@ -1098,43 +1098,57 @@ body {
 
 .research-level {
     flex: 1;
-    background: #151515;
-    border: 1px solid #252525;
+    background: #1a1a1a;
+    border: 1px solid #333;
     border-radius: 3px;
     padding: 10px;
     text-align: center;
     transition: all 0.15s;
 }
 
+.research-level .level-num {
+    color: #888;
+}
+
+.research-level .level-name {
+    color: #ccc;
+}
+
+.research-level .level-cost {
+    color: #888;
+}
+
+/* Researched/unlocked - green tint */
 .research-level.unlocked {
-    background: #1a1a1a;
-    border-color: #333;
+    background: #152015;
+    border-color: #2a4a2a;
 }
 
 .research-level.unlocked .level-num {
-    color: #555;
+    color: #5a8a5a;
 }
 
 .research-level.unlocked .level-name {
-    color: #777;
+    color: #7aba7a;
 }
 
 .research-level.unlocked .level-cost {
-    color: #444;
+    color: #5a8a5a;
 }
 
+/* Available to purchase - highlighted */
 .research-level.available {
-    border-color: #444;
+    border-color: #4a9eff;
     cursor: pointer;
 }
 
 .research-level.available:hover {
-    background: #202020;
-    border-color: #666;
+    background: #1a2530;
+    border-color: #6ab4ff;
 }
 
 .research-level.available .level-num {
-    color: #888;
+    color: #6ab4ff;
 }
 
 .research-level.available .level-name {
@@ -1142,39 +1156,21 @@ body {
 }
 
 .research-level.available .level-cost {
-    color: #888;
+    color: #4a9eff;
 }
 
+/* Next in line (not enough RP) */
 .research-level.next {
-    border-color: #383838;
-}
-
-.research-level.next .level-num {
-    color: #666;
-}
-
-.research-level.next .level-name {
-    color: #999;
+    border-color: #444;
 }
 
 .research-level.next .level-cost {
-    color: #777;
+    color: #aa6666;
 }
 
+/* Locked (need previous levels first) - same as base, no greying */
 .research-level.locked {
-    opacity: 0.55;
-}
-
-.research-level.locked .level-num {
-    color: #555;
-}
-
-.research-level.locked .level-name {
-    color: #777;
-}
-
-.research-level.locked .level-cost {
-    color: #666;
+    /* No opacity reduction - fully visible */
 }
 
 .level-num {

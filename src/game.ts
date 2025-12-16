@@ -118,7 +118,6 @@ export const Game = {
   companyNameEl: null as HTMLElement | null,
   capitalEl: null as HTMLElement | null,
   menuBtn: null as HTMLElement | null,
-  autosaveIndicator: null as HTMLElement | null,
   mapTiles: null as NodeListOf<HTMLElement> | null,
   viewNaMap: null as HTMLElement | null,
   viewMetro: null as HTMLElement | null,
@@ -133,7 +132,6 @@ export const Game = {
     this.companyNameEl = document.getElementById('game-company-name');
     this.capitalEl = document.getElementById('game-capital');
     this.menuBtn = document.getElementById('game-menu-btn');
-    this.autosaveIndicator = document.getElementById('autosave-indicator');
     this.mapTiles = document.querySelectorAll('.map-tile.metro');
 
     this.viewNaMap = document.getElementById('view-na-map');
@@ -201,24 +199,7 @@ export const Game = {
 
   async autosave(): Promise<void> {
     if (!this.config) return;
-
-    if (this.autosaveIndicator) {
-      this.autosaveIndicator.textContent = 'Saving...';
-      this.autosaveIndicator.className = 'autosave-indicator saving';
-    }
-
     await this.save(true);
-
-    if (this.autosaveIndicator) {
-      this.autosaveIndicator.textContent = 'Saved';
-      this.autosaveIndicator.className = 'autosave-indicator saved';
-      setTimeout(() => {
-        if (this.autosaveIndicator) {
-          this.autosaveIndicator.textContent = '';
-          this.autosaveIndicator.className = 'autosave-indicator';
-        }
-      }, 2000);
-    }
   },
 
   switchTab(tabName: string): void {
@@ -312,6 +293,8 @@ export const Game = {
     this.showView('na-map');
     this.switchTab('home');
 
+    // Initialize research and load state
+    Research.init();
     Research.loadState(save.research || { state: {}, points: 100 });
 
     // Initialize economy

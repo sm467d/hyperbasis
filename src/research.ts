@@ -14,31 +14,31 @@ export const ResearchTree: ResearchTreeData = {
       power: {
         name: 'Power Density',
         levels: [
-          { level: 1, name: '5 kW/rack', cost: 15, kw: 5 },
-          { level: 2, name: '10 kW/rack', cost: 40, kw: 10 },
-          { level: 3, name: '20 kW/rack', cost: 100, kw: 20 },
-          { level: 4, name: '50 kW/rack', cost: 250, kw: 50 },
-          { level: 5, name: '100 kW/rack', cost: 600, kw: 100 }
+          { level: 1, name: '5 kW/rack', cost: 60, kw: 5 },
+          { level: 2, name: '10 kW/rack', cost: 160, kw: 10 },
+          { level: 3, name: '20 kW/rack', cost: 400, kw: 20 },
+          { level: 4, name: '50 kW/rack', cost: 1000, kw: 50 },
+          { level: 5, name: '100 kW/rack', cost: 2400, kw: 100 }
         ]
       },
       cooling: {
         name: 'Cooling',
         levels: [
-          { level: 1, name: 'Air (CRAC)', cost: 15, pue: 1.8 },
-          { level: 2, name: 'Hot/Cold Aisle', cost: 40, pue: 1.5 },
-          { level: 3, name: 'Rear-Door Liquid', cost: 100, pue: 1.3 },
-          { level: 4, name: 'Direct-to-Chip', cost: 250, pue: 1.15 },
-          { level: 5, name: 'Immersion', cost: 600, pue: 1.05 }
+          { level: 1, name: 'Air (CRAC)', cost: 60, pue: 1.8 },
+          { level: 2, name: 'Hot/Cold Aisle', cost: 160, pue: 1.5 },
+          { level: 3, name: 'Rear-Door Liquid', cost: 400, pue: 1.3 },
+          { level: 4, name: 'Direct-to-Chip', cost: 1000, pue: 1.15 },
+          { level: 5, name: 'Immersion', cost: 2400, pue: 1.05 }
         ]
       },
       network: {
         name: 'Networking',
         levels: [
-          { level: 1, name: '10 GbE', cost: 15, speed: 10 },
-          { level: 2, name: '25 GbE', cost: 40, speed: 25 },
-          { level: 3, name: '100 GbE', cost: 100, speed: 100 },
-          { level: 4, name: '400 GbE', cost: 250, speed: 400 },
-          { level: 5, name: 'AI Fabric', cost: 600, speed: 800, aiReady: true }
+          { level: 1, name: '10 GbE', cost: 60, speed: 10 },
+          { level: 2, name: '25 GbE', cost: 160, speed: 25 },
+          { level: 3, name: '100 GbE', cost: 400, speed: 100 },
+          { level: 4, name: '400 GbE', cost: 1000, speed: 400 },
+          { level: 5, name: 'AI Fabric', cost: 2400, speed: 800, aiReady: true }
         ]
       }
     }
@@ -49,41 +49,41 @@ export const ResearchTree: ResearchTreeData = {
       storage: {
         name: 'Storage',
         levels: [
-          { level: 1, name: 'HDD Arrays', cost: 10 },
-          { level: 2, name: 'Hybrid Storage', cost: 30 },
-          { level: 3, name: 'SSD Arrays', cost: 75 },
-          { level: 4, name: 'NVMe Flash', cost: 200 },
-          { level: 5, name: 'SCM/Optane', cost: 500 }
+          { level: 1, name: 'HDD Arrays', cost: 40 },
+          { level: 2, name: 'Hybrid Storage', cost: 120 },
+          { level: 3, name: 'SSD Arrays', cost: 300 },
+          { level: 4, name: 'NVMe Flash', cost: 800 },
+          { level: 5, name: 'SCM/Optane', cost: 2000 }
         ]
       },
       compute: {
         name: 'Compute',
         levels: [
-          { level: 1, name: 'Basic Servers', cost: 15 },
-          { level: 2, name: 'Mid-Range', cost: 40 },
-          { level: 3, name: 'High-Core', cost: 100 },
-          { level: 4, name: 'Multi-Socket', cost: 250 },
-          { level: 5, name: 'Custom Silicon', cost: 600 }
+          { level: 1, name: 'Basic Servers', cost: 60 },
+          { level: 2, name: 'Mid-Range', cost: 160 },
+          { level: 3, name: 'High-Core', cost: 400 },
+          { level: 4, name: 'Multi-Socket', cost: 1000 },
+          { level: 5, name: 'Custom Silicon', cost: 2400 }
         ]
       },
       hpc: {
         name: 'HPC',
         levels: [
-          { level: 1, name: 'Basic Cluster', cost: 25 },
-          { level: 2, name: 'InfiniBand', cost: 65 },
-          { level: 3, name: 'Low-Latency', cost: 160 },
-          { level: 4, name: 'Tightly Coupled', cost: 400 },
-          { level: 5, name: 'Exascale Ready', cost: 1000 }
+          { level: 1, name: 'Basic Cluster', cost: 100 },
+          { level: 2, name: 'InfiniBand', cost: 260 },
+          { level: 3, name: 'Low-Latency', cost: 640 },
+          { level: 4, name: 'Tightly Coupled', cost: 1600 },
+          { level: 5, name: 'Exascale Ready', cost: 4000 }
         ]
       },
       gpu: {
         name: 'GPU',
         levels: [
-          { level: 1, name: 'Entry GPU', cost: 30 },
-          { level: 2, name: 'Data Center GPU', cost: 80 },
-          { level: 3, name: 'Multi-GPU Nodes', cost: 200 },
-          { level: 4, name: 'GPU Clusters', cost: 500 },
-          { level: 5, name: 'AI Supercompute', cost: 1200 }
+          { level: 1, name: 'Entry GPU', cost: 120 },
+          { level: 2, name: 'Data Center GPU', cost: 320 },
+          { level: 3, name: 'Multi-GPU Nodes', cost: 800 },
+          { level: 4, name: 'GPU Clusters', cost: 2000 },
+          { level: 5, name: 'AI Supercompute', cost: 4800 }
         ]
       }
     }
@@ -94,11 +94,11 @@ export const ResearchTree: ResearchTreeData = {
       ops: {
         name: 'Operations',
         levels: [
-          { level: 1, name: 'Manual Ops', cost: 10, opexMult: 1.0, recoveryMult: 1.0 },
-          { level: 2, name: 'Basic DCIM', cost: 30, opexMult: 0.9, recoveryMult: 0.8 },
-          { level: 3, name: 'Automated Alerts', cost: 75, opexMult: 0.8, recoveryMult: 0.6 },
-          { level: 4, name: 'Predictive Maintenance', cost: 200, opexMult: 0.7, recoveryMult: 0.4 },
-          { level: 5, name: 'Lights-Out', cost: 500, opexMult: 0.5, recoveryMult: 0.2 }
+          { level: 1, name: 'Manual Ops', cost: 40, opexMult: 1.0, recoveryMult: 1.0 },
+          { level: 2, name: 'Basic DCIM', cost: 120, opexMult: 0.9, recoveryMult: 0.8 },
+          { level: 3, name: 'Automated Alerts', cost: 300, opexMult: 0.8, recoveryMult: 0.6 },
+          { level: 4, name: 'Predictive Maintenance', cost: 800, opexMult: 0.7, recoveryMult: 0.4 },
+          { level: 5, name: 'Lights-Out', cost: 2000, opexMult: 0.5, recoveryMult: 0.2 }
         ]
       }
     }
@@ -109,11 +109,11 @@ export const ResearchTree: ResearchTreeData = {
       forecasting: {
         name: 'Demand Forecasting',
         levels: [
-          { level: 1, name: 'Basic', cost: 10, accuracy: 0.5 },
-          { level: 2, name: 'Trend Analysis', cost: 25, accuracy: 0.65 },
-          { level: 3, name: 'Market Models', cost: 65, accuracy: 0.75 },
-          { level: 4, name: 'Predictive Analytics', cost: 175, accuracy: 0.85 },
-          { level: 5, name: 'AI Forecasting', cost: 450, accuracy: 0.95 }
+          { level: 1, name: 'Basic', cost: 40, accuracy: 0.5 },
+          { level: 2, name: 'Trend Analysis', cost: 100, accuracy: 0.65 },
+          { level: 3, name: 'Market Models', cost: 260, accuracy: 0.75 },
+          { level: 4, name: 'Predictive Analytics', cost: 700, accuracy: 0.85 },
+          { level: 5, name: 'AI Forecasting', cost: 1800, accuracy: 0.95 }
         ]
       }
     }

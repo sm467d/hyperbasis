@@ -15,38 +15,39 @@ export function setGameRef(game: typeof gameRef): void {
 
 export const MetroMapGen = {
   generateNoVA(): MetroMapData {
-    const cols = 100;
+    const cols = 200;
     const rows = 80;
     const grid: (Tile | null)[] = [];
 
+    // Doubled x coords and radius, halved prices (1 tile = 1 edge DC footprint)
     const regions: RegionDef[] = [
-      { name: 'Leesburg', cx: 16, cy: 8, radius: 8, available: true, priceBase: 800000 },
-      { name: 'Purcellville', cx: 6, cy: 6, radius: 6, available: true, priceBase: 600000 },
-      { name: 'Ashburn', cx: 30, cy: 16, radius: 12, available: true, priceBase: 2000000 },
-      { name: 'Sterling', cx: 44, cy: 18, radius: 8, available: true, priceBase: 1500000 },
-      { name: 'Dulles', cx: 36, cy: 26, radius: 10, available: true, priceBase: 2200000 },
-      { name: 'Herndon', cx: 52, cy: 22, radius: 6, available: true, priceBase: 1400000 },
-      { name: 'Reston', cx: 60, cy: 24, radius: 8, available: true, priceBase: 1600000 },
-      { name: 'Chantilly', cx: 40, cy: 36, radius: 8, available: true, priceBase: 1300000 },
-      { name: 'Centreville', cx: 32, cy: 40, radius: 8, available: true, priceBase: 1000000 },
-      { name: 'Gainesville', cx: 16, cy: 36, radius: 8, available: true, priceBase: 750000 },
-      { name: 'Haymarket', cx: 8, cy: 40, radius: 6, available: true, priceBase: 650000 },
-      { name: 'Manassas', cx: 24, cy: 48, radius: 10, available: true, priceBase: 1100000 },
-      { name: 'Warrenton', cx: 8, cy: 60, radius: 8, available: true, priceBase: 550000 },
-      { name: 'Woodbridge', cx: 64, cy: 60, radius: 8, available: true, priceBase: 700000 },
-      { name: 'Stafford', cx: 56, cy: 72, radius: 8, available: true, priceBase: 450000 },
+      { name: 'Leesburg', cx: 32, cy: 8, radius: 16, available: true, priceBase: 400000 },
+      { name: 'Purcellville', cx: 12, cy: 6, radius: 12, available: true, priceBase: 300000 },
+      { name: 'Ashburn', cx: 60, cy: 16, radius: 24, available: true, priceBase: 1000000 },
+      { name: 'Sterling', cx: 88, cy: 18, radius: 16, available: true, priceBase: 750000 },
+      { name: 'Dulles', cx: 72, cy: 26, radius: 20, available: true, priceBase: 1100000 },
+      { name: 'Herndon', cx: 104, cy: 22, radius: 12, available: true, priceBase: 700000 },
+      { name: 'Reston', cx: 120, cy: 24, radius: 16, available: true, priceBase: 800000 },
+      { name: 'Chantilly', cx: 80, cy: 36, radius: 16, available: true, priceBase: 650000 },
+      { name: 'Centreville', cx: 64, cy: 40, radius: 16, available: true, priceBase: 500000 },
+      { name: 'Gainesville', cx: 32, cy: 36, radius: 16, available: true, priceBase: 375000 },
+      { name: 'Haymarket', cx: 16, cy: 40, radius: 12, available: true, priceBase: 325000 },
+      { name: 'Manassas', cx: 48, cy: 48, radius: 20, available: true, priceBase: 550000 },
+      { name: 'Warrenton', cx: 16, cy: 60, radius: 16, available: true, priceBase: 275000 },
+      { name: 'Woodbridge', cx: 128, cy: 60, radius: 16, available: true, priceBase: 350000 },
+      { name: 'Stafford', cx: 112, cy: 72, radius: 16, available: true, priceBase: 225000 },
       // Tysons is now available (premium pricing)
-      { name: 'Tysons', cx: 70, cy: 28, radius: 8, available: true, priceBase: 3500000 },
+      { name: 'Tysons', cx: 140, cy: 28, radius: 16, available: true, priceBase: 1750000 },
       // Unavailable urban areas
-      { name: 'McLean', cx: 80, cy: 24, radius: 6, available: false, priceBase: 0 },
-      { name: 'Vienna', cx: 68, cy: 36, radius: 6, available: false, priceBase: 0 },
-      { name: 'Fairfax', cx: 60, cy: 40, radius: 8, available: false, priceBase: 0 },
-      { name: 'Falls Church', cx: 80, cy: 32, radius: 4, available: false, priceBase: 0 },
-      { name: 'Arlington', cx: 88, cy: 28, radius: 8, available: false, priceBase: 0 },
-      { name: 'Alexandria', cx: 88, cy: 44, radius: 8, available: false, priceBase: 0 },
-      { name: 'Springfield', cx: 72, cy: 52, radius: 6, available: false, priceBase: 0 },
-      { name: 'Burke', cx: 64, cy: 48, radius: 4, available: false, priceBase: 0 },
-      { name: 'Annandale', cx: 76, cy: 40, radius: 4, available: false, priceBase: 0 },
+      { name: 'McLean', cx: 160, cy: 24, radius: 12, available: false, priceBase: 0 },
+      { name: 'Vienna', cx: 136, cy: 36, radius: 12, available: false, priceBase: 0 },
+      { name: 'Fairfax', cx: 120, cy: 40, radius: 16, available: false, priceBase: 0 },
+      { name: 'Falls Church', cx: 160, cy: 32, radius: 8, available: false, priceBase: 0 },
+      { name: 'Arlington', cx: 176, cy: 28, radius: 16, available: false, priceBase: 0 },
+      { name: 'Alexandria', cx: 176, cy: 44, radius: 16, available: false, priceBase: 0 },
+      { name: 'Springfield', cx: 144, cy: 52, radius: 12, available: false, priceBase: 0 },
+      { name: 'Burke', cx: 128, cy: 48, radius: 8, available: false, priceBase: 0 },
+      { name: 'Annandale', cx: 152, cy: 40, radius: 8, available: false, priceBase: 0 },
     ];
 
     for (let y = 0; y < rows; y++) {
@@ -74,7 +75,7 @@ export const MetroMapGen = {
 
     const labels: MapLabel[] = regions.map(r => ({
       name: r.name,
-      x: r.cx * 29,
+      x: r.cx * 15,
       y: r.cy * 29,
       major: ['Ashburn', 'Dulles', 'Tysons', 'Arlington', 'Manassas'].includes(r.name)
     }));
