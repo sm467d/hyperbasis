@@ -113,8 +113,7 @@
                 </div>
             </div>
             <div class="game-banner-right">
-                <button class="banner-btn" id="game-save-btn">Save</button>
-                <button class="banner-btn" id="game-menu-btn">Menu</button>
+                <span class="autosave-indicator" id="autosave-indicator"></span>
             </div>
         </div>
 
@@ -126,6 +125,13 @@
                     <button class="sidebar-btn" data-tab="research">Research</button>
                     <button class="sidebar-btn" data-tab="design">Design</button>
                 </nav>
+                <div class="sidebar-footer">
+                    <button class="sidebar-btn" data-tab="settings">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Settings
+                    </button>
+                    <button class="sidebar-btn sidebar-btn-back" id="game-menu-btn">← Back to Menu</button>
+                </div>
             </div>
 
             <div class="game-main">
@@ -228,9 +234,9 @@
                                 <div class="card-detail">Base income (testing)</div>
                             </div>
                             <div class="summary-card expenses">
-                                <div class="card-label">Research Budget</div>
-                                <div class="card-value" id="research-budget">$5,000,000</div>
-                                <div class="card-detail"><span id="rp-per-month">25.0</span> RP/month</div>
+                                <div class="card-label">Expenses</div>
+                                <div class="card-value" id="total-expenses">$5,000,000</div>
+                                <div class="card-detail">Monthly OpEx</div>
                             </div>
                             <div class="summary-card net">
                                 <div class="card-label">Net Income</div>
@@ -395,6 +401,27 @@
                     <div class="empty-state">
                         <h2>Design</h2>
                         <p>Coming soon</p>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-panel" id="tab-settings">
+                    <div class="settings-container">
+                        <h2 class="settings-title">Settings</h2>
+
+                        <div class="settings-section">
+                            <h3 class="settings-section-title">Display</h3>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <span class="settings-name">Theme</span>
+                                    <span class="settings-desc">Switch between light and dark mode</span>
+                                </div>
+                                <div class="theme-toggle" id="theme-toggle">
+                                    <button class="theme-btn active" data-theme="dark">Dark</button>
+                                    <button class="theme-btn" data-theme="light">Light</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

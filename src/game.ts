@@ -118,19 +118,22 @@ export const Game = {
   companyNameEl: null as HTMLElement | null,
   capitalEl: null as HTMLElement | null,
   menuBtn: null as HTMLElement | null,
-  saveBtn: null as HTMLElement | null,
+  autosaveIndicator: null as HTMLElement | null,
   mapTiles: null as NodeListOf<HTMLElement> | null,
   viewNaMap: null as HTMLElement | null,
   viewMetro: null as HTMLElement | null,
   sidebarBtns: null as NodeListOf<HTMLElement> | null,
   tabPanels: null as NodeListOf<HTMLElement> | null,
+  themeToggle: null as HTMLElement | null,
+
+  autosaveInterval: null as number | null,
 
   init(): void {
     this.gameScreen = document.getElementById('game-screen');
     this.companyNameEl = document.getElementById('game-company-name');
     this.capitalEl = document.getElementById('game-capital');
     this.menuBtn = document.getElementById('game-menu-btn');
-    this.saveBtn = document.getElementById('game-save-btn');
+    this.autosaveIndicator = document.getElementById('autosave-indicator');
     this.mapTiles = document.querySelectorAll('.map-tile.metro');
 
     this.viewNaMap = document.getElementById('view-na-map');
@@ -138,17 +141,18 @@ export const Game = {
 
     this.sidebarBtns = document.querySelectorAll('.game-sidebar .sidebar-btn');
     this.tabPanels = document.querySelectorAll('.game-main .tab-panel');
+    this.themeToggle = document.getElementById('theme-toggle');
 
     // Set up cross-module references
     setGameRef(this);
     setEconomyGameRef(this);
 
     this.bindEvents();
+    this.loadTheme();
   },
 
   bindEvents(): void {
     this.menuBtn?.addEventListener('click', () => this.returnToMenu());
-    this.saveBtn?.addEventListener('click', () => this.save());
 
     this.mapTiles?.forEach(tile => {
       tile.addEventListener('click', () => this.selectMetro(tile.dataset.metro || ''));
@@ -157,6 +161,64 @@ export const Game = {
     this.sidebarBtns?.forEach(btn => {
       btn.addEventListener('click', () => this.switchTab(btn.dataset.tab || ''));
     });
+
+    // Theme toggle
+    this.themeToggle?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('theme-btn')) {
+        const theme = target.dataset.theme;
+        this.setTheme(theme || 'dark');
+      }
+    });
+  },
+
+  loadTheme(): void {
+    const savedTheme = localStorage.getItem('hyperbasis-theme') || 'dark';
+    this.setTheme(savedTheme);
+  },
+
+  setTheme(theme: string): void {
+    document.body.classList.toggle('light-theme', theme === 'light');
+    localStorage.setItem('hyperbasis-theme', theme);
+
+    // Update toggle buttons
+    this.themeToggle?.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.classList.toggle('active', (btn as HTMLElement).dataset.theme === theme);
+    });
+  },
+
+  startAutosave(): void {
+    // Autosave every 5 seconds
+    this.autosaveInterval = window.setInterval(() => this.autosave(), 5000);
+  },
+
+  stopAutosave(): void {
+    if (this.autosaveInterval !== null) {
+      clearInterval(this.autosaveInterval);
+      this.autosaveInterval = null;
+    }
+  },
+
+  async autosave(): Promise<void> {
+    if (!this.config) return;
+
+    if (this.autosaveIndicator) {
+      this.autosaveIndicator.textContent = 'Saving...';
+      this.autosaveIndicator.className = 'autosave-indicator saving';
+    }
+
+    await this.save(true);
+
+    if (this.autosaveIndicator) {
+      this.autosaveIndicator.textContent = 'Saved';
+      this.autosaveIndicator.className = 'autosave-indicator saved';
+      setTimeout(() => {
+        if (this.autosaveIndicator) {
+          this.autosaveIndicator.textContent = '';
+          this.autosaveIndicator.className = 'autosave-indicator';
+        }
+      }, 2000);
+    }
   },
 
   switchTab(tabName: string): void {
@@ -210,6 +272,9 @@ export const Game = {
     GameTime.reset();
     GameTime.init();
     GameTime.start();
+
+    // Start autosave
+    this.startAutosave();
 
     this.gameScreen?.classList.add('active');
   },
@@ -266,10 +331,13 @@ export const Game = {
       GameTime.start();
     }
 
+    // Start autosave
+    this.startAutosave();
+
     this.gameScreen?.classList.add('active');
   },
 
-  async save(): Promise<void> {
+  async save(silent: boolean = false): Promise<void> {
     if (!this.config) return;
 
     const gameState = {
@@ -284,21 +352,8 @@ export const Game = {
     };
 
     const success = await SaveManager.saveGame(gameState);
-    if (success) {
-      if (this.saveBtn) {
-        this.saveBtn.textContent = 'Saved!';
-        setTimeout(() => {
-          if (this.saveBtn) this.saveBtn.textContent = 'Save';
-        }, 1000);
-      }
+    if (success && !silent) {
       uiRef?.updateLoadGameBtn();
-    } else {
-      if (this.saveBtn) {
-        this.saveBtn.textContent = 'Error!';
-        setTimeout(() => {
-          if (this.saveBtn) this.saveBtn.textContent = 'Save';
-        }, 1000);
-      }
     }
   },
 
@@ -325,6 +380,7 @@ export const Game = {
 
   returnToMenu(): void {
     GameTime.pause();
+    this.stopAutosave();
     session.clearCurrentGameId();
     this.gameScreen?.classList.remove('active');
     uiRef?.showMainMenu();

@@ -878,6 +878,44 @@ body {
     border-left-color: #fff;
 }
 
+.sidebar-btn svg {
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-btn-back {
+    color: #666;
+    font-size: 13px;
+}
+
+.sidebar-btn-back:hover {
+    color: #999;
+}
+
+/* Autosave indicator */
+.autosave-indicator {
+    font-size: 11px;
+    color: #555;
+    padding: 4px 8px;
+}
+
+.autosave-indicator.saving {
+    color: #4a9eff;
+}
+
+.autosave-indicator.saved {
+    color: #4a4;
+}
+
 .game-main {
     flex: 1;
     display: flex;
@@ -1108,23 +1146,35 @@ body {
 }
 
 .research-level.next {
-    border-color: #333;
+    border-color: #383838;
 }
 
 .research-level.next .level-num {
-    color: #444;
+    color: #666;
 }
 
 .research-level.next .level-name {
-    color: #555;
+    color: #999;
 }
 
 .research-level.next .level-cost {
-    color: #444;
+    color: #777;
 }
 
 .research-level.locked {
-    opacity: 0.35;
+    opacity: 0.55;
+}
+
+.research-level.locked .level-num {
+    color: #555;
+}
+
+.research-level.locked .level-name {
+    color: #777;
+}
+
+.research-level.locked .level-cost {
+    color: #666;
 }
 
 .level-num {
@@ -1468,6 +1518,194 @@ body {
     min-width: 110px;
     text-align: right;
     font-family: 'Aptos Mono', monospace;
+}
+
+/* Settings Tab */
+.settings-container {
+    flex: 1;
+    padding: 30px;
+    max-width: 600px;
+}
+
+.settings-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 30px;
+}
+
+.settings-section {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.settings-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.settings-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.settings-name {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.settings-desc {
+    font-size: 12px;
+    color: #555;
+}
+
+.theme-toggle {
+    display: flex;
+    background: #1a1a1a;
+    border-radius: 4px;
+    padding: 3px;
+    gap: 3px;
+}
+
+.theme-btn {
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    color: #666;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.theme-btn:hover {
+    color: #888;
+}
+
+.theme-btn.active {
+    background: #333;
+    color: #fff;
+}
+
+/* Light theme */
+body.light-theme {
+    background: #f5f5f5;
+    color: #333;
+}
+
+body.light-theme #game-screen {
+    background: #f5f5f5;
+}
+
+body.light-theme .game-banner {
+    background: #fff;
+    border-bottom-color: #ddd;
+}
+
+body.light-theme .game-sidebar {
+    background: #fff;
+    border-right-color: #ddd;
+}
+
+body.light-theme .sidebar-btn {
+    color: #666;
+}
+
+body.light-theme .sidebar-btn:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+body.light-theme .sidebar-btn.active {
+    background: #f0f0f0;
+    color: #000;
+    border-left-color: #000;
+}
+
+body.light-theme .sidebar-footer {
+    border-top-color: #ddd;
+}
+
+body.light-theme .tab-panel {
+    background: #f5f5f5;
+}
+
+body.light-theme .finance-panel,
+body.light-theme .settings-section,
+body.light-theme .research-branch {
+    background: #fff;
+    border-color: #ddd;
+}
+
+body.light-theme .summary-card {
+    background: #fff;
+    border-color: #ddd;
+}
+
+body.light-theme .card-label,
+body.light-theme .panel-header {
+    color: #666;
+}
+
+body.light-theme .card-value {
+    color: #000;
+}
+
+body.light-theme .research-header {
+    background: #fff;
+    border-bottom-color: #ddd;
+}
+
+body.light-theme .research-points-value {
+    color: #000;
+}
+
+body.light-theme .research-points-rate {
+    background: #f0f0f0;
+    border-color: #ddd;
+}
+
+body.light-theme .research-sub {
+    background: #f8f8f8;
+    border-color: #eee;
+}
+
+body.light-theme .research-level {
+    background: #fff;
+    border-color: #ddd;
+}
+
+body.light-theme .settings-title {
+    color: #000;
+}
+
+body.light-theme .settings-name {
+    color: #333;
+}
+
+body.light-theme .theme-toggle {
+    background: #eee;
+}
+
+body.light-theme .theme-btn.active {
+    background: #fff;
+    color: #000;
 }
 
 /* Load Game Screen */

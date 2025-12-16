@@ -27,7 +27,7 @@ export const Economy = {
 
   // DOM elements
   revenueDisplay: null as HTMLElement | null,
-  researchBudgetDisplay: null as HTMLElement | null,
+  expensesDisplay: null as HTMLElement | null,
   netIncomeDisplay: null as HTMLElement | null,
   allocationSlider: null as HTMLInputElement | null,
   sliderFill: null as HTMLElement | null,
@@ -38,7 +38,7 @@ export const Economy = {
 
   init(): void {
     this.revenueDisplay = document.getElementById('economy-revenue');
-    this.researchBudgetDisplay = document.getElementById('research-budget');
+    this.expensesDisplay = document.getElementById('total-expenses');
     this.netIncomeDisplay = document.getElementById('net-income');
     this.allocationSlider = document.getElementById('research-slider') as HTMLInputElement;
     this.sliderFill = document.getElementById('research-slider-fill');
@@ -116,8 +116,9 @@ export const Economy = {
     if (this.revenueDisplay) {
       this.revenueDisplay.textContent = '$' + Math.floor(this.monthlyRevenue).toLocaleString();
     }
-    if (this.researchBudgetDisplay) {
-      this.researchBudgetDisplay.textContent = '$' + Math.floor(this.researchBudget).toLocaleString();
+    if (this.expensesDisplay) {
+      // For now, expenses = research budget (will expand later)
+      this.expensesDisplay.textContent = '$' + Math.floor(this.researchBudget).toLocaleString();
     }
     if (this.netIncomeDisplay) {
       this.netIncomeDisplay.textContent = '$' + Math.floor(netIncome).toLocaleString();
