@@ -42,7 +42,13 @@ gamesRouter.get('/:id', (req, res) => {
         totalDays: game.time_total_days,
         speed: game.time_speed,
         paused: Boolean(game.time_paused)
-      }
+      },
+      economy: {
+        monthlyRevenue: game.economy_revenue || 10000000,
+        researchBudget: game.economy_research_budget || 5000000
+      },
+      designs: JSON.parse((game.designs_json as string) || '{"spcn":[],"rack":[]}'),
+      campuses: JSON.parse((game.campuses_json as string) || '[]')
     }
   });
 });
@@ -76,7 +82,7 @@ gamesRouter.post('/', (req, res) => {
 // Save/update game state
 gamesRouter.put('/:id', (req, res) => {
   const gameId = Number(req.params.id);
-  const { capital, research, time } = req.body;
+  const { capital, research, time, economy, designs, campuses } = req.body;
 
   const updateData: Record<string, unknown> = {};
 
@@ -108,6 +114,23 @@ gamesRouter.put('/:id', (req, res) => {
     if (time.paused !== undefined) {
       updateData.time_paused = time.paused ? 1 : 0;
     }
+  }
+
+  if (economy) {
+    if (economy.monthlyRevenue !== undefined) {
+      updateData.economy_revenue = economy.monthlyRevenue;
+    }
+    if (economy.researchBudget !== undefined) {
+      updateData.economy_research_budget = economy.researchBudget;
+    }
+  }
+
+  if (designs) {
+    updateData.designs_json = JSON.stringify(designs);
+  }
+
+  if (campuses) {
+    updateData.campuses_json = JSON.stringify(campuses);
   }
 
   if (Object.keys(updateData).length === 0) {

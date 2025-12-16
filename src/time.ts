@@ -79,8 +79,8 @@ export const GameTime = {
   },
 
   cycleSpeed(): void {
-    // Cycle through 1x, 2x, 5x, 10x
-    const speeds = [1, 2, 5, 10];
+    // Cycle through 1x, 3x, 5x, 10x
+    const speeds = [1, 3, 5, 10];
     const currentIndex = speeds.indexOf(this.speed);
     this.speed = speeds[(currentIndex + 1) % speeds.length];
 

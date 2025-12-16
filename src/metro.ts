@@ -1,5 +1,6 @@
 import type { Tile, RegionDef, MapLabel, MetroMapData, TileEntry } from './types';
 import { gamesApi, session } from './api';
+import { CampusManager } from './campus';
 
 // Game reference (set via setGame to avoid circular dependency)
 let gameRef: {
@@ -7,6 +8,7 @@ let gameRef: {
   capital: number;
   updateCapitalDisplay: () => void;
   showMap: () => void;
+  showCampus: (campusId: string) => void;
 } | null = null;
 
 export function setGameRef(game: typeof gameRef): void {
@@ -15,39 +17,46 @@ export function setGameRef(game: typeof gameRef): void {
 
 export const MetroMapGen = {
   generateNoVA(): MetroMapData {
-    const cols = 200;
-    const rows = 80;
+    const cols = 120;
+    const rows = 100;
     const grid: (Tile | null)[] = [];
 
-    // Doubled x coords and radius, halved prices (1 tile = 1 edge DC footprint)
+    // Square tiles (14x14), map shaped more like NoVA region
+    // NoVA extends from DC west to Loudoun, south to Prince William
     const regions: RegionDef[] = [
-      { name: 'Leesburg', cx: 32, cy: 8, radius: 16, available: true, priceBase: 400000 },
-      { name: 'Purcellville', cx: 12, cy: 6, radius: 12, available: true, priceBase: 300000 },
-      { name: 'Ashburn', cx: 60, cy: 16, radius: 24, available: true, priceBase: 1000000 },
-      { name: 'Sterling', cx: 88, cy: 18, radius: 16, available: true, priceBase: 750000 },
-      { name: 'Dulles', cx: 72, cy: 26, radius: 20, available: true, priceBase: 1100000 },
-      { name: 'Herndon', cx: 104, cy: 22, radius: 12, available: true, priceBase: 700000 },
-      { name: 'Reston', cx: 120, cy: 24, radius: 16, available: true, priceBase: 800000 },
-      { name: 'Chantilly', cx: 80, cy: 36, radius: 16, available: true, priceBase: 650000 },
-      { name: 'Centreville', cx: 64, cy: 40, radius: 16, available: true, priceBase: 500000 },
-      { name: 'Gainesville', cx: 32, cy: 36, radius: 16, available: true, priceBase: 375000 },
-      { name: 'Haymarket', cx: 16, cy: 40, radius: 12, available: true, priceBase: 325000 },
-      { name: 'Manassas', cx: 48, cy: 48, radius: 20, available: true, priceBase: 550000 },
-      { name: 'Warrenton', cx: 16, cy: 60, radius: 16, available: true, priceBase: 275000 },
-      { name: 'Woodbridge', cx: 128, cy: 60, radius: 16, available: true, priceBase: 350000 },
-      { name: 'Stafford', cx: 112, cy: 72, radius: 16, available: true, priceBase: 225000 },
-      // Tysons is now available (premium pricing)
-      { name: 'Tysons', cx: 140, cy: 28, radius: 16, available: true, priceBase: 1750000 },
-      // Unavailable urban areas
-      { name: 'McLean', cx: 160, cy: 24, radius: 12, available: false, priceBase: 0 },
-      { name: 'Vienna', cx: 136, cy: 36, radius: 12, available: false, priceBase: 0 },
-      { name: 'Fairfax', cx: 120, cy: 40, radius: 16, available: false, priceBase: 0 },
-      { name: 'Falls Church', cx: 160, cy: 32, radius: 8, available: false, priceBase: 0 },
-      { name: 'Arlington', cx: 176, cy: 28, radius: 16, available: false, priceBase: 0 },
-      { name: 'Alexandria', cx: 176, cy: 44, radius: 16, available: false, priceBase: 0 },
-      { name: 'Springfield', cx: 144, cy: 52, radius: 12, available: false, priceBase: 0 },
-      { name: 'Burke', cx: 128, cy: 48, radius: 8, available: false, priceBase: 0 },
-      { name: 'Annandale', cx: 152, cy: 40, radius: 8, available: false, priceBase: 0 },
+      // Loudoun County (west) - Data Center Alley
+      { name: 'Leesburg', cx: 20, cy: 15, radius: 10, available: true, priceBase: 400000 },
+      { name: 'Purcellville', cx: 8, cy: 12, radius: 8, available: true, priceBase: 300000 },
+      { name: 'Ashburn', cx: 35, cy: 25, radius: 14, available: true, priceBase: 1000000 },
+      { name: 'Sterling', cx: 50, cy: 28, radius: 10, available: true, priceBase: 750000 },
+      // Dulles Corridor
+      { name: 'Dulles', cx: 42, cy: 38, radius: 12, available: true, priceBase: 1100000 },
+      { name: 'Herndon', cx: 60, cy: 32, radius: 8, available: true, priceBase: 700000 },
+      { name: 'Reston', cx: 70, cy: 35, radius: 10, available: true, priceBase: 800000 },
+      // Fairfax County (central)
+      { name: 'Chantilly', cx: 48, cy: 50, radius: 10, available: true, priceBase: 650000 },
+      { name: 'Centreville', cx: 38, cy: 55, radius: 10, available: true, priceBase: 500000 },
+      // Prince William County (southwest)
+      { name: 'Gainesville', cx: 22, cy: 52, radius: 10, available: true, priceBase: 375000 },
+      { name: 'Haymarket', cx: 12, cy: 58, radius: 8, available: true, priceBase: 325000 },
+      { name: 'Manassas', cx: 30, cy: 68, radius: 12, available: true, priceBase: 550000 },
+      // Fauquier (far west)
+      { name: 'Warrenton', cx: 8, cy: 78, radius: 10, available: true, priceBase: 275000 },
+      // Stafford/Woodbridge (south)
+      { name: 'Woodbridge', cx: 75, cy: 80, radius: 10, available: true, priceBase: 350000 },
+      { name: 'Stafford', cx: 60, cy: 90, radius: 10, available: true, priceBase: 225000 },
+      // Tysons - premium area
+      { name: 'Tysons', cx: 82, cy: 38, radius: 10, available: true, priceBase: 1750000 },
+      // Unavailable urban areas (too developed/expensive)
+      { name: 'McLean', cx: 92, cy: 32, radius: 8, available: false, priceBase: 0 },
+      { name: 'Vienna', cx: 78, cy: 48, radius: 8, available: false, priceBase: 0 },
+      { name: 'Fairfax', cx: 68, cy: 55, radius: 10, available: false, priceBase: 0 },
+      { name: 'Falls Church', cx: 95, cy: 42, radius: 6, available: false, priceBase: 0 },
+      { name: 'Arlington', cx: 105, cy: 35, radius: 10, available: false, priceBase: 0 },
+      { name: 'Alexandria', cx: 105, cy: 55, radius: 10, available: false, priceBase: 0 },
+      { name: 'Springfield', cx: 85, cy: 65, radius: 8, available: false, priceBase: 0 },
+      { name: 'Burke', cx: 75, cy: 60, radius: 6, available: false, priceBase: 0 },
+      { name: 'Annandale', cx: 90, cy: 52, radius: 6, available: false, priceBase: 0 },
     ];
 
     for (let y = 0; y < rows; y++) {
@@ -55,8 +64,10 @@ export const MetroMapGen = {
         let tile: Tile | null = null;
 
         for (const region of regions) {
-          const dist = Math.sqrt(Math.pow(x - region.cx, 2) + Math.pow(y - region.cy, 2));
-          if (dist <= region.radius) {
+          // Square regions: check if within bounding box
+          const inRegion = Math.abs(x - region.cx) <= region.radius &&
+                           Math.abs(y - region.cy) <= region.radius;
+          if (inRegion) {
             const variation = (Math.random() - 0.5) * 0.4;
             const price = Math.round(region.priceBase * (1 + variation) / 10000) * 10000;
             tile = {
@@ -76,7 +87,7 @@ export const MetroMapGen = {
     const labels: MapLabel[] = regions.map(r => ({
       name: r.name,
       x: r.cx * 15,
-      y: r.cy * 29,
+      y: r.cy * 15,
       major: ['Ashburn', 'Dulles', 'Tysons', 'Arlington', 'Manassas'].includes(r.name)
     }));
 
@@ -102,6 +113,8 @@ export const Metro = {
 
   // Selection state
   isSelecting: false,
+  selectStartX: 0,
+  selectStartY: 0,
   selectedTiles: [] as Tile[],
   tileElements: {} as { [key: string]: TileEntry },
 
@@ -200,13 +213,14 @@ export const Metro = {
       this.lastMouseY = e.clientY;
       this.metroContent?.classList.add('dragging');
     } else if (this.mode === 'select') {
-      this.isSelecting = true;
-      const tile = target.closest('.land-tile.available') as HTMLElement;
-      if (tile && tile.dataset.tileId) {
-        const entry = this.tileElements[tile.dataset.tileId];
-        if (entry) {
-          this.toggleTileSelection(entry.tile, entry.el);
-        }
+      // Get tile coordinates from mouse position
+      const coords = this.getTileCoords(e);
+      if (coords) {
+        this.isSelecting = true;
+        this.selectStartX = coords.x;
+        this.selectStartY = coords.y;
+        this.clearSelection();
+        this.selectRectangle(coords.x, coords.y, coords.x, coords.y);
       }
     }
   },
@@ -221,12 +235,10 @@ export const Metro = {
       this.lastMouseY = e.clientY;
       this.updateTransform();
     } else if (this.isSelecting && this.mode === 'select') {
-      const tile = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement;
-      if (tile && tile.classList.contains('land-tile') && tile.classList.contains('available') && tile.dataset.tileId) {
-        const entry = this.tileElements[tile.dataset.tileId];
-        if (entry && !this.selectedTiles.find(t => t.id === entry.tile.id)) {
-          this.addTileToSelection(entry.tile, entry.el);
-        }
+      const coords = this.getTileCoords(e);
+      if (coords) {
+        this.clearSelection();
+        this.selectRectangle(this.selectStartX, this.selectStartY, coords.x, coords.y);
       }
     }
   },
@@ -237,11 +249,38 @@ export const Metro = {
     this.metroContent?.classList.remove('dragging');
   },
 
+  getTileCoords(e: MouseEvent): { x: number; y: number } | null {
+    if (!this.mapViewport) return null;
+    const rect = this.mapViewport.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left - this.panX) / this.zoom / 15);
+    const y = Math.floor((e.clientY - rect.top - this.panY) / this.zoom / 15);
+    return { x, y };
+  },
+
+  selectRectangle(x1: number, y1: number, x2: number, y2: number): void {
+    if (!this.currentMetro) return;
+
+    const minX = Math.min(x1, x2);
+    const maxX = Math.max(x1, x2);
+    const minY = Math.min(y1, y2);
+    const maxY = Math.max(y1, y2);
+
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const tileId = `${this.currentMetro}-${x}-${y}`;
+        const entry = this.tileElements[tileId];
+        if (entry && entry.tile.available) {
+          this.addTileToSelection(entry.tile, entry.el);
+        }
+      }
+    }
+  },
+
   updateCoords(e: MouseEvent): void {
     if (!this.mapViewport || !this.coordsDisplay) return;
     const rect = this.mapViewport.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left - this.panX) / this.zoom / 29);
-    const y = Math.floor((e.clientY - rect.top - this.panY) / this.zoom / 29);
+    const x = Math.floor((e.clientX - rect.left - this.panX) / this.zoom / 15);
+    const y = Math.floor((e.clientY - rect.top - this.panY) / this.zoom / 15);
     this.coordsDisplay.textContent = `${x}, ${y}`;
   },
 
@@ -265,11 +304,15 @@ export const Metro = {
     gameRef?.showMap();
   },
 
+  openCampus(campusId: string): void {
+    gameRef?.showCampus(campusId);
+  },
+
   renderGrid(data: MetroMapData): void {
     if (!this.landGrid) return;
 
     this.landGrid.innerHTML = '';
-    this.landGrid.style.gridTemplateColumns = `repeat(${data.cols}, 28px)`;
+    this.landGrid.style.gridTemplateColumns = `repeat(${data.cols}, 14px)`;
     this.tileElements = {};
 
     data.grid.forEach((tile) => {
@@ -281,6 +324,20 @@ export const Metro = {
 
         if (isOwned) {
           el.classList.add('owned');
+          el.dataset.tileId = tile.id;
+
+          // Add hover tooltip for owned tiles
+          const campus = CampusManager.getCampusForTile(tile.id);
+          if (campus) {
+            const stats = CampusManager.getCampusStats(campus);
+            el.title = `${campus.name}\n${stats.totalTiles} tiles\n${stats.dcCount} DCs\n${stats.totalMW.toFixed(1)} MW`;
+
+            // Make clickable to open campus
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', () => {
+              this.openCampus(campus.id);
+            });
+          }
         } else if (tile.available) {
           el.classList.add('available');
           el.dataset.tileId = tile.id;
@@ -382,9 +439,14 @@ export const Metro = {
 
       // Update local state
       gameRef.capital = result.newCapital;
+      const purchasedTileIds = this.selectedTiles.map(t => t.id);
       this.selectedTiles.forEach(tile => {
         gameRef!.ownedTiles.push(tile.id);
       });
+
+      // Create or expand campus with purchased tiles
+      const campus = CampusManager.addTiles(this.currentMetro, purchasedTileIds);
+      console.log('Campus updated:', campus.name, 'tiles:', campus.tiles.length);
 
       gameRef.updateCapitalDisplay();
       this.selectedTiles = [];

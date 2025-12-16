@@ -1,11 +1,11 @@
-import Database from 'better-sqlite3';
+import Database, { Database as DatabaseType } from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, '..', 'hyperbasis.db');
 
-export const db = new Database(dbPath);
+export const db: DatabaseType = new Database(dbPath);
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
@@ -35,6 +35,9 @@ export function initDB() {
       time_total_days INTEGER DEFAULT 0,
       time_speed INTEGER DEFAULT 1,
       time_paused INTEGER DEFAULT 1,
+      economy_revenue REAL DEFAULT 10000000,
+      economy_research_budget REAL DEFAULT 5000000,
+      designs_json TEXT DEFAULT '{"spcn":[],"rack":[]}',
       created_at INTEGER DEFAULT (strftime('%s', 'now')),
       updated_at INTEGER DEFAULT (strftime('%s', 'now')),
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -55,6 +58,20 @@ export function initDB() {
     CREATE INDEX IF NOT EXISTS idx_games_user ON games(user_id);
     CREATE INDEX IF NOT EXISTS idx_tiles_game ON owned_tiles(game_id);
   `);
+
+  // Migration: add new columns if they don't exist
+  try {
+    db.exec(`ALTER TABLE games ADD COLUMN economy_revenue REAL DEFAULT 10000000`);
+  } catch (e) { /* column exists */ }
+  try {
+    db.exec(`ALTER TABLE games ADD COLUMN economy_research_budget REAL DEFAULT 5000000`);
+  } catch (e) { /* column exists */ }
+  try {
+    db.exec(`ALTER TABLE games ADD COLUMN designs_json TEXT DEFAULT '{"spcn":[],"rack":[]}'`);
+  } catch (e) { /* column exists */ }
+  try {
+    db.exec(`ALTER TABLE games ADD COLUMN campuses_json TEXT DEFAULT '[]'`);
+  } catch (e) { /* column exists */ }
 
   console.log('Database initialized');
 }
@@ -109,6 +126,10 @@ export const gameOps = {
     time_total_days?: number;
     time_speed?: number;
     time_paused?: number;
+    economy_revenue?: number;
+    economy_research_budget?: number;
+    designs_json?: string;
+    campuses_json?: string;
   }) {
     const fields = Object.keys(data).map(k => `${k} = ?`).join(', ');
     const values = Object.values(data);
@@ -135,8 +156,8 @@ export const tileOps = {
       VALUES (?, ?, ?, ?, ?)
     `);
 
-    const transaction = db.transaction((tiles: typeof tiles) => {
-      for (const tile of tiles) {
+    const transaction = db.transaction((tileList: { tile_id: string; metro: string; region: string; price: number }[]) => {
+      for (const tile of tileList) {
         insertStmt.run(gameId, tile.tile_id, tile.metro, tile.region, tile.price);
       }
     });

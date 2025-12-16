@@ -61,7 +61,7 @@
 
     <!-- Game Config -->
     <div id="game-config">
-        <h1>New Game</h1>
+        <h1>New</h1>
 
         <div class="config-container">
             <div class="config-section">
@@ -103,7 +103,6 @@
         <div class="game-banner">
             <div class="game-banner-left">
                 <span class="company-name" id="game-company-name">Company</span>
-                <span class="capital-display" id="game-capital">$10,000,000</span>
             </div>
             <div class="game-banner-center">
                 <div class="time-controls">
@@ -114,13 +113,14 @@
             </div>
             <div class="game-banner-right">
                 <span class="autosave-indicator" id="autosave-indicator"></span>
+                <span class="capital-display" id="game-capital">$10,000,000</span>
             </div>
         </div>
 
         <div class="game-body">
             <div class="game-sidebar">
                 <nav class="sidebar-nav">
-                    <button class="sidebar-btn active" data-tab="home">Home</button>
+                    <button class="sidebar-btn active" data-tab="home">Map</button>
                     <button class="sidebar-btn" data-tab="finance">Finance</button>
                     <button class="sidebar-btn" data-tab="research">Research</button>
                     <button class="sidebar-btn" data-tab="design">Design</button>
@@ -218,6 +218,59 @@
                                 <span>Total: <strong id="selection-total">$0</strong></span>
                                 <button class="cancel-btn" id="selection-cancel">Cancel</button>
                                 <button id="selection-buy">Buy</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campus View -->
+                    <div class="view-panel" id="view-campus">
+                        <div class="campus-content">
+                            <div class="campus-header">
+                                <button class="back-btn" id="campus-back-btn">← Back</button>
+                                <h2 class="campus-title" id="campus-title">Campus Name</h2>
+                                <div class="campus-stats" id="campus-stats">
+                                    <span class="stat"><strong id="campus-tiles">0</strong> tiles</span>
+                                    <span class="stat"><strong id="campus-dcs">0</strong> DCs</span>
+                                    <span class="stat"><strong id="campus-mw">0</strong> MW</span>
+                                </div>
+                            </div>
+                            <div class="campus-body">
+                                <div class="campus-grid-container">
+                                    <div class="campus-grid" id="campus-grid">
+                                        <!-- Grid cells will be rendered here -->
+                                    </div>
+                                </div>
+                                <div class="campus-sidebar">
+                                    <div class="campus-dcs-list">
+                                        <h3>Datacenters</h3>
+                                        <div id="campus-dc-list">
+                                            <div class="no-dcs">No DCs built yet</div>
+                                        </div>
+                                        <button class="btn-primary" id="build-dc-btn">+ Build Datacenter</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Build DC Modal -->
+                            <div class="campus-modal" id="build-dc-modal">
+                                <div class="modal-content">
+                                    <h3>Build Datacenter</h3>
+                                    <div class="form-group">
+                                        <label for="dc-name">Datacenter Name</label>
+                                        <input type="text" id="dc-name" placeholder="e.g., DC-1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dc-design">DC Design</label>
+                                        <select id="dc-design"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <p class="help-text">Click on the grid to place the datacenter</p>
+                                    </div>
+                                    <div class="modal-actions">
+                                        <button class="btn-secondary" id="cancel-build-dc">Cancel</button>
+                                        <button class="btn-primary" id="confirm-build-dc" disabled>Build</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -398,9 +451,130 @@
 
                 <!-- Design Tab -->
                 <div class="tab-panel" id="tab-design">
-                    <div class="empty-state">
-                        <h2>Design</h2>
-                        <p>Coming soon</p>
+                    <div class="design-page">
+                        <div class="design-columns">
+                            <!-- Left Column: DC Infrastructure -->
+                            <div class="design-column">
+                                <div class="design-column-header">
+                                    <div class="column-title">
+                                        <span class="column-icon">🏢</span>
+                                        <h3>DC Infrastructure</h3>
+                                    </div>
+                                    <button class="design-add-btn" id="new-spcn-btn">+</button>
+                                </div>
+                                <p class="column-desc">Define datacenter specs: cooling, power, network, redundancy</p>
+                                <div class="design-cards" id="spcn-design-list">
+                                    <div class="no-designs">No DC designs yet. Create one to get started.</div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Rack Configurations -->
+                            <div class="design-column">
+                                <div class="design-column-header">
+                                    <div class="column-title">
+                                        <span class="column-icon">🗄️</span>
+                                        <h3>Rack Configurations</h3>
+                                    </div>
+                                    <button class="design-add-btn" id="new-rack-btn">+</button>
+                                </div>
+                                <p class="column-desc">Configure rack types: compute, storage, GPU, HPC</p>
+                                <div class="design-cards" id="rack-design-list">
+                                    <div class="no-designs">No rack designs yet. Create one to get started.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SPCN Form Modal -->
+                        <div class="design-modal" id="spcn-form-container">
+                            <div class="design-modal-content">
+                                <form class="design-form" id="spcn-form">
+                                    <div class="modal-header">
+                                        <h3>New DC Design</h3>
+                                        <button type="button" class="modal-close" id="spcn-cancel">&times;</button>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group full">
+                                            <label for="spcn-name">Design Name</label>
+                                            <input type="text" id="spcn-name" placeholder="e.g., Gen3-Liquid" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="spcn-size">Footprint</label>
+                                            <select id="spcn-size" required></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="spcn-power">Power Density</label>
+                                            <select id="spcn-power" required></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="spcn-cooling">Cooling</label>
+                                            <select id="spcn-cooling" required></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="spcn-network">Network</label>
+                                            <select id="spcn-network" required></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group full">
+                                            <label for="spcn-redundancy">Power Redundancy</label>
+                                            <select id="spcn-redundancy" required></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-calc" id="spcn-calc">
+                                        <div class="calc-placeholder">Select all options to see calculations</div>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="button" class="btn-secondary" id="spcn-cancel-2">Cancel</button>
+                                        <button type="submit" class="btn-primary">Create Design</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Rack Form Modal -->
+                        <div class="design-modal" id="rack-form-container">
+                            <div class="design-modal-content">
+                                <form class="design-form" id="rack-form">
+                                    <div class="modal-header">
+                                        <h3>New Rack Design</h3>
+                                        <button type="button" class="modal-close" id="rack-cancel">&times;</button>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group full">
+                                            <label for="rack-name">Design Name</label>
+                                            <input type="text" id="rack-name" placeholder="e.g., AI-Dense" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="rack-type">Rack Type</label>
+                                            <select id="rack-type" required></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="rack-tier">Hardware Tier</label>
+                                            <select id="rack-tier" required></select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row" id="rack-nodes-group" style="display: none;">
+                                        <div class="form-group full">
+                                            <label for="rack-nodes">Nodes per Rack: <span id="rack-nodes-value">0</span></label>
+                                            <input type="range" id="rack-nodes" min="1" max="42" value="20" class="slider-input">
+                                        </div>
+                                    </div>
+                                    <div class="form-calc" id="rack-calc">
+                                        <div class="calc-placeholder">Select type and tier to see calculations</div>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="button" class="btn-secondary" id="rack-cancel-2">Cancel</button>
+                                        <button type="submit" class="btn-primary">Create Design</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

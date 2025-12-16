@@ -5,6 +5,9 @@ import { Metro, MetroData, setGameRef } from './metro';
 import { GameTime } from './time';
 import { session } from './api';
 import { Economy, setEconomyGameRef } from './economy';
+import { Designs } from './designs';
+import { CampusManager } from './campus';
+import { CampusView, setCampusGameRef } from './campusView';
 
 // UI reference (set via setUI to avoid circular dependency)
 let uiRef: {
@@ -112,7 +115,7 @@ export const Game = {
   config: null as GameConfigType | null,
   capital: 0,
   ownedTiles: [] as string[],
-  currentView: 'na-map' as 'na-map' | 'metro',
+  currentView: 'na-map' as 'na-map' | 'metro' | 'campus',
 
   gameScreen: null as HTMLElement | null,
   companyNameEl: null as HTMLElement | null,
@@ -144,6 +147,10 @@ export const Game = {
     // Set up cross-module references
     setGameRef(this);
     setEconomyGameRef(this);
+    setCampusGameRef(this);
+
+    // Initialize campus view
+    CampusView.init();
 
     this.bindEvents();
     this.loadTheme();
@@ -249,6 +256,14 @@ export const Game = {
     Economy.reset();
     Economy.init();
 
+    // Initialize designs
+    Designs.spcnDesigns = [];
+    Designs.rackDesigns = [];
+    Designs.init();
+
+    // Initialize campuses
+    CampusManager.reset();
+
     // Initialize and start time
     GameTime.reset();
     GameTime.init();
@@ -275,6 +290,8 @@ export const Game = {
       paused: boolean;
     };
     economy?: { monthlyRevenue: number; researchBudget: number };
+    designs?: { spcn: any[]; rack: any[] };
+    campuses?: any[];
   }): void {
     this.config = {
       companyName: save.companyName,
@@ -305,6 +322,18 @@ export const Game = {
       Economy.reset();
     }
 
+    // Initialize designs
+    Designs.init();
+    if (save.designs) {
+      Designs.loadState(save.designs);
+    }
+
+    // Initialize campuses
+    CampusManager.reset();
+    if (save.campuses) {
+      CampusManager.loadState(save.campuses);
+    }
+
     // Load time state
     GameTime.init();
     if (save.time) {
@@ -331,7 +360,9 @@ export const Game = {
       region: this.config.region,
       research: Research.getState(),
       time: GameTime.getState(),
-      economy: Economy.getState()
+      economy: Economy.getState(),
+      designs: Designs.getState(),
+      campuses: CampusManager.getState()
     };
 
     const success = await SaveManager.saveGame(gameState);
@@ -346,10 +377,16 @@ export const Game = {
     }
   },
 
-  showView(view: 'na-map' | 'metro'): void {
+  showView(view: 'na-map' | 'metro' | 'campus'): void {
     this.currentView = view;
     this.viewNaMap?.classList.toggle('active', view === 'na-map');
     this.viewMetro?.classList.toggle('active', view === 'metro');
+    document.getElementById('view-campus')?.classList.toggle('active', view === 'campus');
+  },
+
+  showCampus(campusId: string): void {
+    this.showView('campus');
+    CampusView.open(campusId);
   },
 
   selectMetro(metroId: string): void {

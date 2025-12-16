@@ -59,6 +59,15 @@ export interface GameData {
     speed: number;
     paused: boolean;
   };
+  economy?: {
+    monthlyRevenue: number;
+    researchBudget: number;
+  };
+  designs?: {
+    spcn: unknown[];
+    rack: unknown[];
+  };
+  campuses?: unknown[];
 }
 
 export const gamesApi = {
@@ -86,6 +95,9 @@ export const gamesApi = {
       speed: number;
       paused: boolean;
     };
+    economy?: { monthlyRevenue: number; researchBudget: number };
+    designs?: { spcn: unknown[]; rack: unknown[] };
+    campuses?: unknown[];
   }) {
     return request<{ success: boolean }>(`/games/${gameId}`, {
       method: 'PUT',

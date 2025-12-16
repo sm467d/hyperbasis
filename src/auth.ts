@@ -86,6 +86,15 @@ function gameDataToSave(game: GameData) {
       speed: 1,
       paused: true
     },
+    economy: game.economy || {
+      monthlyRevenue: 10000000,
+      researchBudget: 5000000
+    },
+    designs: game.designs || {
+      spcn: [],
+      rack: []
+    },
+    campuses: game.campuses || [],
     savedAt: game.updated_at * 1000
   };
 }
@@ -108,7 +117,11 @@ export const SaveManager = {
     }
   },
 
-  async saveGame(gameState: GameState): Promise<boolean> {
+  async saveGame(gameState: GameState & {
+    economy?: { monthlyRevenue: number; researchBudget: number };
+    designs?: { spcn: unknown[]; rack: unknown[] };
+    campuses?: unknown[];
+  }): Promise<boolean> {
     const gameId = session.getCurrentGameId();
     if (!gameId) return false;
 
@@ -116,7 +129,10 @@ export const SaveManager = {
       await gamesApi.save(gameId, {
         capital: gameState.capital,
         research: gameState.research,
-        time: gameState.time
+        time: gameState.time,
+        economy: gameState.economy,
+        designs: gameState.designs,
+        campuses: gameState.campuses
       });
       return true;
     } catch {
