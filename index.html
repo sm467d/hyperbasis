@@ -917,6 +917,160 @@
             font-size: 14px;
         }
 
+        /* Research Tree */
+        .research-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #222;
+            background: #0d0d0d;
+        }
+
+        .research-points-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .research-points-label strong {
+            color: #fff;
+            font-size: 18px;
+            margin-left: 5px;
+        }
+
+        .research-tree {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .research-branch {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 4px;
+            padding: 20px;
+        }
+
+        .branch-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .branch-subs {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .research-sub {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 3px;
+            padding: 15px;
+        }
+
+        .sub-header {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .sub-levels {
+            display: flex;
+            gap: 8px;
+        }
+
+        .research-level {
+            flex: 1;
+            background: #151515;
+            border: 1px solid #252525;
+            border-radius: 3px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .research-level.unlocked {
+            background: #1a1a1a;
+            border-color: #333;
+        }
+
+        .research-level.unlocked .level-num {
+            color: #555;
+        }
+
+        .research-level.unlocked .level-name {
+            color: #777;
+        }
+
+        .research-level.unlocked .level-cost {
+            color: #444;
+        }
+
+        .research-level.available {
+            border-color: #444;
+            cursor: pointer;
+        }
+
+        .research-level.available:hover {
+            background: #202020;
+            border-color: #666;
+        }
+
+        .research-level.available .level-num {
+            color: #888;
+        }
+
+        .research-level.available .level-name {
+            color: #fff;
+        }
+
+        .research-level.available .level-cost {
+            color: #888;
+        }
+
+        .research-level.next {
+            border-color: #333;
+        }
+
+        .research-level.next .level-num {
+            color: #444;
+        }
+
+        .research-level.next .level-name {
+            color: #555;
+        }
+
+        .research-level.next .level-cost {
+            color: #444;
+        }
+
+        .research-level.locked {
+            opacity: 0.35;
+        }
+
+        .level-num {
+            font-size: 10px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .level-name {
+            font-size: 11px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 4px;
+        }
+
+        .level-cost {
+            font-size: 10px;
+            color: #333;
+        }
+
         /* Load Game Screen */
         #load-screen {
             display: none;
@@ -1243,10 +1397,10 @@
 
                 <!-- Research Tab -->
                 <div class="tab-panel" id="tab-research">
-                    <div class="empty-state">
-                        <h2>Research</h2>
-                        <p>Coming soon</p>
+                    <div class="research-header">
+                        <span class="research-points-label">Research Points: <strong id="research-points">0</strong></span>
                     </div>
+                    <div class="research-tree" id="research-tree"></div>
                 </div>
 
                 <!-- Design Tab -->
