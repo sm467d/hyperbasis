@@ -2,6 +2,7 @@ import type { GameConfig as GameConfigType, Save } from './types';
 import { SaveManager } from './auth';
 import { Research } from './research';
 import { Metro, MetroData, setGameRef } from './metro';
+import { GameTime } from './time';
 
 // UI reference (set via setUI to avoid circular dependency)
 let uiRef: {
@@ -169,6 +170,11 @@ export const Game = {
     Research.points = 100;
     Research.init();
 
+    // Initialize and start time
+    GameTime.reset();
+    GameTime.init();
+    GameTime.start();
+
     this.gameScreen?.classList.add('active');
   },
 
@@ -189,6 +195,15 @@ export const Game = {
 
     Research.loadState(save.research || { state: {}, points: 100 });
 
+    // Load time state
+    GameTime.init();
+    if (save.time) {
+      GameTime.loadState(save.time);
+    } else {
+      GameTime.reset();
+      GameTime.start();
+    }
+
     this.gameScreen?.classList.add('active');
   },
 
@@ -201,7 +216,8 @@ export const Game = {
       ownedTiles: this.ownedTiles,
       difficulty: this.config.difficulty,
       region: this.config.region,
-      research: Research.getState()
+      research: Research.getState(),
+      time: GameTime.getState()
     };
 
     if (SaveManager.saveGame(gameState)) {
@@ -237,6 +253,7 @@ export const Game = {
   },
 
   returnToMenu(): void {
+    GameTime.pause();
     this.gameScreen?.classList.remove('active');
     uiRef?.showMainMenu();
   },

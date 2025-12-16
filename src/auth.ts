@@ -116,6 +116,7 @@ export const SaveManager = {
       difficulty: gameState.difficulty,
       region: gameState.region,
       research: gameState.research,
+      time: gameState.time,
       savedAt: Date.now()
     };
 

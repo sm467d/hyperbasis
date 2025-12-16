@@ -476,6 +476,52 @@ body {
     color: #888;
 }
 
+/* Time Controls */
+.game-banner-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    padding: 4px 12px;
+}
+
+.time-btn {
+    width: 32px;
+    height: 28px;
+    background: none;
+    border: 1px solid #333;
+    border-radius: 2px;
+    color: #666;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-btn:hover {
+    border-color: #555;
+    color: #888;
+}
+
+.date-display {
+    font-family: 'Aptos Mono', monospace;
+    font-size: 14px;
+    color: #888;
+    min-width: 100px;
+    text-align: center;
+}
+
 /* Map Container */
 .map-container {
     flex: 1;

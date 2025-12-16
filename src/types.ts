@@ -23,7 +23,22 @@ export interface Save {
   difficulty: string;
   region: string;
   research: ResearchState;
+  time: TimeState;
   savedAt: number;
+}
+
+// Time types
+export interface GameDate {
+  year: number;
+  month: number;
+  day: number;
+}
+
+export interface TimeState {
+  date: GameDate;
+  totalDays: number;
+  speed: number;
+  paused: boolean;
 }
 
 // Game types
@@ -41,6 +56,7 @@ export interface GameState {
   difficulty: string;
   region: string;
   research: ResearchState;
+  time: TimeState;
 }
 
 // Research types
